@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Go Golf</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: the brand banner opens on deep green, then the page alternates green and cream "holes". Big Shoulders for everything loud, Barlow for reading. Light green for the club, orange only for flags and the main action. */
+:root{
+  --green:#11402F;
+  --green-2:#174C38;
+  --deep:#0B2D20;
+  --cream:#F4F5EF;
+  --white:#FFFFFF;
+  --light:#7DB58C;
+  --ink:#10241A;
+  --muted:#53665B;
+  --line:#D9DED5;
+  --flag:#F2552C;
+  --display:"Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
+  --body:"Barlow", "Helvetica Neue", Arial, sans-serif;
+  color-scheme: light;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.55}
+img,svg,video{max-width:100%}
+a{color:inherit}
+h1,h2,h3{font-family:var(--display);font-weight:900;line-height:.95;margin:0;text-wrap:balance;text-transform:uppercase;letter-spacing:.005em}
+h2{font-size:clamp(46px,7vw,84px)}
+h3{font-size:26px;letter-spacing:.01em}
+p{margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+.eyebrow{font-family:var(--display);font-weight:700;text-transform:uppercase;letter-spacing:.14em;font-size:17px;color:var(--flag);margin-bottom:12px}
+:focus-visible{outline:3px solid var(--flag);outline-offset:3px;border-radius:4px}
+[hidden]{display:none!important}
+.dark{background:var(--green);color:var(--cream)}
+.dark .muted,.dark .sec-head p{color:#B4C9BC}
+
+/* Nav */
+nav{position:sticky;top:0;z-index:40;background:var(--green);color:var(--cream);border-bottom:1px solid rgba(255,255,255,.07)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:60px}
+.wordmark{font-family:var(--display);font-weight:900;font-size:28px;letter-spacing:.02em;text-decoration:none}
+.navlinks{display:flex;gap:24px;font-weight:600;font-size:15px}
+.navlinks a{text-decoration:none;opacity:.85}
+.navlinks a:hover{opacity:1;color:var(--light)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:var(--body);font-weight:700;font-size:16px;border:0;border-radius:999px;padding:13px 24px;background:var(--flag);color:var(--white);cursor:pointer;text-decoration:none;box-shadow:0 3px 0 #B53A19;transition:transform .12s,box-shadow .12s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 5px 0 #B53A19}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 #B53A19}
+.btn.cream{background:var(--cream);color:var(--green);box-shadow:0 3px 0 #B9C4BC}
+.btn.green{background:var(--green);color:var(--cream);box-shadow:0 3px 0 #06231A}
+.btn.ghost{background:transparent;color:inherit;box-shadow:inset 0 0 0 2px currentColor}
+.btn.sm{padding:9px 16px;font-size:14px}
+.btn:disabled{opacity:.6;cursor:wait}
+@media (max-width:860px){.navlinks{display:none}}
+
+/* Hero */
+.hero{background:var(--green);color:var(--cream);padding-bottom:56px}
+.hero svg{display:block;width:100%;height:auto;max-height:66vh}
+.hero-copy{display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap;margin-top:-6px}
+.hero-copy p{font-size:clamp(19px,2vw,23px);max-width:38ch;color:#D5E2DA}
+.hero-cta{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.counter{font-family:var(--display);font-weight:700;font-size:19px;letter-spacing:.06em;text-transform:uppercase;color:var(--light)}
+.counter b{color:var(--cream);font-weight:900;font-size:26px}
+
+section{padding:96px 0}
+.sec-head{display:grid;grid-template-columns:1.1fr .9fr;gap:32px;align-items:end;margin-bottom:44px}
+.sec-head p{color:var(--muted);max-width:46ch;justify-self:end}
+@media (max-width:860px){.sec-head{grid-template-columns:1fr}.sec-head p{justify-self:start}}
+
+/* Story */
+.photo{margin:0;position:relative}
+.photo img{display:block;width:100%;aspect-ratio:4/5;object-fit:cover;object-position:50% 40%;border-radius:18px;box-shadow:0 20px 44px rgba(17,64,47,.22)}
+.photo figcaption{margin-top:10px;font-size:14px;color:var(--muted)}
+@media (max-width:860px){.photo img{aspect-ratio:4/4.4}}
+.story .wrap{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center}
+.photo-slot{aspect-ratio:4/5;border-radius:16px;background:#E2E7DF;border:2px dashed #A9B5AC;display:grid;place-items:center;text-align:center;padding:24px;color:var(--muted)}
+.photo-slot b{display:block;font-family:var(--display);font-size:26px;text-transform:uppercase;color:var(--ink)}
+.story p+p{margin-top:16px}
+.story h2{margin-bottom:24px}
+.pull{margin-top:28px;font-family:var(--display);font-weight:900;text-transform:uppercase;font-size:clamp(30px,3.4vw,42px);line-height:1;color:var(--green)}
+.pull span{color:var(--flag)}
+@media (max-width:860px){.story .wrap{grid-template-columns:1fr}.photo-slot{aspect-ratio:4/3}}
+
+/* How + kit */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:56px}
+.step{background:var(--green-2);border-radius:16px;padding:20px}
+.step .n{font-family:var(--display);font-weight:900;font-size:44px;color:var(--light);line-height:1}
+.step h3{margin:8px 0 6px;font-size:24px}
+.step p{font-size:15px;color:#B4C9BC}
+@media (max-width:900px){.steps{grid-template-columns:1fr 1fr}}
+@media (max-width:480px){.steps{grid-template-columns:1fr}}
+.kit{display:grid;grid-template-columns:1.25fr .75fr;gap:28px;align-items:stretch}
+.swing-card{background:var(--deep);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.swing-card svg{display:block;width:100%;height:auto;border-radius:12px}
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.seg button{font-family:var(--body);font-weight:700;font-size:15px;border:0;border-radius:999px;padding:9px 16px;background:rgba(244,245,239,.1);color:var(--cream);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--light);color:var(--deep)}
+.swing-desc{color:#D5E2DA;min-height:1.6em}
+.face-card{background:var(--cream);color:var(--ink);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:10px}
+.face-card svg{display:block;width:100%;height:auto}
+.face-card h3{font-size:26px}
+.face-card p{font-size:15px;color:var(--muted)}
+.kit-list{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:28px}
+.kit-list div{border-top:2px solid var(--light);padding-top:12px}
+.kit-list b{font-family:var(--display);text-transform:uppercase;font-size:22px;display:block;line-height:1}
+.kit-list p{font-size:15px;color:#B4C9BC;margin-top:4px}
+.note{font-size:13px;color:#93AE9F;margin-top:14px}
+@media (max-width:900px){.kit{grid-template-columns:1fr}.kit-list{grid-template-columns:1fr 1fr}}
+
+/* Founding members */
+.founders{background:var(--cream)}
+.f-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start}
+.perks{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:22px 0 26px}
+.perk{background:var(--white);border-radius:14px;padding:16px 18px}
+.perk b{font-family:var(--display);text-transform:uppercase;font-size:24px;display:block;line-height:1;color:var(--green)}
+.perk p{font-size:15px;color:var(--muted);margin-top:4px}
+.join-form{display:grid;gap:14px;background:var(--white);border-radius:18px;padding:24px}
+.field label{display:block;font-weight:700;font-size:15px;margin-bottom:6px}
+.field small{font-weight:500;color:var(--muted)}
+input[type=text],input[type=email],textarea,select{width:100%;font:inherit;font-size:16px;padding:11px 14px;border:1.5px solid #C2CBC4;border-radius:10px;background:var(--white);color:var(--ink)}
+textarea{min-height:76px;resize:vertical}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--flag)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.status{font-weight:600;font-size:15px;min-height:1.4em}
+details.more{border-top:1px solid var(--line);padding-top:12px}
+details.more summary{cursor:pointer;font-weight:700;color:var(--green)}
+details.more[open] summary{margin-bottom:12px}
+details.more .field+.field{margin-top:12px}
+@media (max-width:900px){.f-grid{grid-template-columns:1fr}}
+@media (max-width:520px){.row2,.perks{grid-template-columns:1fr}}
+
+/* Member card */
+.mcard{position:relative;aspect-ratio:1.586/1;border-radius:20px;background:var(--green);color:var(--cream);padding:24px 26px;overflow:hidden;box-shadow:0 22px 44px rgba(17,64,47,.3)}
+.mcard::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(122deg,transparent 0 26px,rgba(255,255,255,.035) 26px 52px)}
+.mcard .top{position:relative;display:flex;justify-content:space-between;align-items:flex-start}
+.mcard .wm{font-family:var(--display);font-weight:900;font-size:30px;letter-spacing:.02em}
+.mcard .tag{font-family:var(--display);font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:14px;color:var(--light);text-align:right}
+.mcard .num{position:absolute;left:26px;bottom:58px;font-family:var(--display);font-weight:900;font-size:clamp(64px,9vw,104px);line-height:.85;color:var(--cream)}
+.mcard .num span{color:var(--light);font-size:.45em;vertical-align:top;margin-right:4px}
+.mcard .name{position:absolute;left:26px;bottom:22px;font-family:var(--display);font-weight:700;text-transform:uppercase;letter-spacing:.1em;font-size:20px}
+.mcard svg.club{position:absolute;right:-6%;bottom:16%;width:62%;opacity:.95}
+.mcard.preview .num,.mcard.preview .name{opacity:.5}
+.me-panel{display:grid;gap:14px;margin-top:20px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{background:var(--white);border-radius:14px;padding:12px 14px}
+.stat b{display:block;font-family:var(--display);font-weight:900;font-size:36px;line-height:1;color:var(--green)}
+.stat span{font-size:13px;color:var(--muted);font-weight:600}
+.invite{display:flex;gap:8px;background:var(--white);border-radius:12px;padding:6px}
+.invite input{border:0;font-size:14px;padding:8px 10px}
+.board{margin-top:28px;background:var(--white);border-radius:18px;padding:20px 22px}
+.board h3{color:var(--green);margin-bottom:10px}
+.board ol{list-style:none;margin:0;padding:0}
+.board li{display:grid;grid-template-columns:34px 1fr auto;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--line);font-weight:600}
+.board li .r{font-family:var(--display);font-weight:900;font-size:22px;color:var(--light)}
+.board li .c{font-family:var(--display);font-weight:900;font-size:22px;color:var(--green)}
+.board li.empty{display:block;color:var(--muted);font-size:15px;font-weight:500}
+
+/* Trick shots */
+.shots{background:var(--deep);color:var(--cream)}
+.shots .sec-head p{color:#B4C9BC}
+.shot-top{display:grid;grid-template-columns:280px 1fr 1fr;gap:20px;align-items:stretch}
+.qr-card{background:var(--cream);color:var(--ink);padding:18px;border-radius:16px;text-align:center}
+.qr-card #qr svg{width:100%;height:auto;display:block}
+.qr-card b{display:block;font-family:var(--display);text-transform:uppercase;font-size:28px;margin-top:10px;line-height:1}
+.qr-card small{display:block;color:var(--muted);margin-top:4px;font-size:14px}
+.featured{background:var(--green);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:10px}
+.featured .lbl{font-family:var(--display);font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--flag);font-size:16px}
+.featured video{width:100%;border-radius:10px;aspect-ratio:16/10;object-fit:cover;background:#000}
+.featured .ph{aspect-ratio:16/10;border-radius:10px;border:2px dashed #2E6A4F;display:grid;place-items:center;text-align:center;color:#93AE9F;padding:12px}
+.form-dark{display:grid;gap:12px;background:var(--green);padding:18px;border-radius:16px}
+.form-dark label{color:#D5E2DA}
+.form-dark input,.form-dark textarea{background:var(--deep);color:var(--cream);border-color:#2E6A4F}
+.file-drop{border:2px dashed #2E6A4F;border-radius:12px;padding:12px;text-align:center;color:#B4C9BC;font-size:14px}
+.shot-wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-top:28px}
+.shot{background:var(--green);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.shot video{display:block;width:100%;aspect-ratio:9/14;object-fit:cover;background:#000}
+.shot .meta{padding:12px 14px;display:grid;gap:8px;flex:1}
+.shot .meta b{font-family:var(--display);text-transform:uppercase;font-size:22px;line-height:1}
+.shot .meta p{font-size:14px;color:#B4C9BC}
+.vote{justify-self:start;border:0;border-radius:999px;padding:8px 14px;font:700 14px var(--body);background:rgba(244,245,239,.12);color:var(--cream);cursor:pointer}
+.vote[aria-pressed="true"]{background:var(--flag);color:#fff}
+.wall-note{color:#B4C9BC;margin-top:28px}
+@media (max-width:960px){.shot-top{grid-template-columns:1fr 1fr}.qr-card{grid-column:span 2;max-width:320px}}
+@media (max-width:620px){.shot-top{grid-template-columns:1fr}.qr-card{grid-column:auto}}
+
+/* Dare */
+.build-grid{display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:start}
+.form{display:grid;gap:14px}
+.dare{position:sticky;top:84px}
+.card{background:var(--green);color:var(--cream);border-radius:18px;overflow:hidden;box-shadow:0 18px 40px rgba(17,64,47,.22)}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;padding:20px 22px 8px}
+.card-top .k{font-family:var(--display);font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--light);font-size:15px}
+.card-top .t{font-family:var(--display);font-weight:900;font-size:44px;text-transform:uppercase;line-height:.95}
+.card-top .par{text-align:center;background:var(--cream);color:var(--green);border-radius:12px;padding:6px 12px;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+.card-top .par b{display:block;font-family:var(--display);font-size:34px;color:var(--flag);line-height:1}
+.card dl{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;margin:0;padding:10px 22px 16px}
+.card dt{font-family:var(--display);font-weight:700;text-transform:uppercase;letter-spacing:.1em;font-size:15px;color:var(--light)}
+.card dd{margin:0}
+.card-talk{margin:0 22px;padding:14px 16px;background:var(--flag);color:#fff;border-radius:12px;font-family:var(--display);font-weight:900;text-transform:uppercase;font-size:28px;line-height:1}
+.card-from{padding:12px 22px 20px;font-size:14px;color:#B4C9BC}
+@media (max-width:900px){.build-grid{grid-template-columns:1fr}.dare{position:static}}
+
+/* Rivalries */
+.riv-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center}
+.riv{background:var(--green-2);border-radius:18px;padding:22px;display:grid;gap:14px}
+.riv .ex{font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--light)}
+.h2h{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;text-align:center}
+.h2h .p b{display:block;font-family:var(--display);font-weight:900;font-size:26px;text-transform:uppercase}
+.h2h .score{font-family:var(--display);font-weight:900;font-size:64px;line-height:1}
+.h2h .score span{color:var(--light)}
+.form-strip{display:flex;gap:6px;justify-content:center}
+.form-strip i{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-weight:700;font-size:12px}
+.form-strip .w{background:var(--light);color:var(--deep)}
+.form-strip .l{background:rgba(244,245,239,.14);color:var(--cream)}
+.riv-row{display:flex;justify-content:space-between;border-top:1px solid rgba(255,255,255,.08);padding-top:10px;font-size:15px;color:#D5E2DA}
+.riv-list{display:grid;gap:12px;margin-top:20px}
+.riv-list div{display:flex;gap:12px;align-items:baseline}
+.riv-list b{font-family:var(--display);font-size:24px;color:var(--light);min-width:28px}
+@media (max-width:900px){.riv-grid{grid-template-columns:1fr}}
+
+footer{background:var(--deep);color:#93AE9F;padding:36px 0;font-size:14px}
+footer .wrap{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
+footer .wordmark{color:var(--cream)}
+
+/* Scorecard */
+.sc-head{background:var(--green);color:var(--cream);padding:40px 0 30px}
+.sc-head h1{font-size:clamp(56px,9vw,104px)}
+.sc-head p{color:#D5E2DA;margin-top:10px;max-width:52ch}
+.sc-controls{display:flex;flex-wrap:wrap;gap:18px;align-items:end;margin-top:24px}
+.lbl2{font-family:var(--display);font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:15px;color:#B4C9BC;margin-bottom:8px}
+.players{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.player-chip{display:flex;align-items:center;background:var(--white);border-radius:999px;overflow:hidden}
+.player-chip input{border:0;width:120px;padding:9px 6px 9px 16px;font-weight:600;border-radius:0}
+.player-chip button{border:0;background:#E3E7E0;color:var(--ink);width:36px;align-self:stretch;cursor:pointer;font-size:18px}
+.sc-body{padding:28px 0 80px}
+.table-wrap{overflow-x:auto;background:var(--white);border-radius:16px}
+table{border-collapse:collapse;width:100%;min-width:560px;font-variant-numeric:tabular-nums}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:center}
+th{font-family:var(--display);font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:15px;color:var(--muted);background:#F7F8F4}
+td.hn{width:52px}
+td.hn span{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--green);color:var(--cream);font-family:var(--display);font-weight:900;font-size:18px}
+td.desc{text-align:left;min-width:190px}
+td.desc input{border:0;border-bottom:1.5px dashed #C3CCC6;border-radius:0;padding:6px 2px;font-size:15px}
+td.desc small{display:block;font-size:12px;color:var(--flag);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-top:3px;min-height:1.2em}
+.stroke{display:flex;align-items:center;justify-content:center;gap:4px}
+.stroke button{width:32px;height:34px;border:0;background:#EEF1EC;border-radius:8px;font-size:18px;cursor:pointer;color:var(--ink)}
+.stroke input{width:44px;text-align:center;padding:6px 2px;font-weight:700;font-size:17px}
+td.win .stroke input{background:#E3F2E6;border-color:var(--light)}
+tfoot td{font-family:var(--display);font-weight:900;font-size:28px;background:#F7F8F4;border-bottom:0}
+tfoot td.leader{color:var(--flag)}
+.sc-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px;align-items:center}
+.leaderboard{margin-top:18px;font-weight:600}
+.sc-head .seg button{background:rgba(244,245,239,.12)}
+
+
+/* Problem */
+.problem{background:var(--cream)}
+.pains{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.pain{background:var(--white);border-radius:16px;padding:22px;position:relative;overflow:hidden}
+.pain b{font-family:var(--display);font-weight:900;text-transform:uppercase;font-size:34px;line-height:1;color:var(--green);display:block;margin-bottom:6px;text-decoration:line-through;text-decoration-color:var(--flag);text-decoration-thickness:4px}
+.pain p{color:var(--muted)}
+.turn{margin-top:44px;font-family:var(--display);font-weight:900;text-transform:uppercase;font-size:clamp(40px,6vw,76px);line-height:.95;color:var(--green);text-wrap:balance}
+.turn span{color:var(--flag)}
+@media (max-width:760px){.pains{grid-template-columns:1fr}}
+/* Game */
+.try{background:var(--green-2);color:var(--cream)}
+.try .sec-head p{color:#B4C9BC}
+.game{background:var(--deep);border-radius:20px;padding:18px;display:grid;gap:14px}
+.game svg{display:block;width:100%;height:auto;border-radius:12px;touch-action:none}
+.g-top{display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap;padding:2px 4px}
+.g-k{display:block;font-family:var(--display);font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:14px;color:var(--light)}
+.g-top b{font-family:var(--display);font-weight:900;font-size:32px;text-transform:uppercase;line-height:1}
+.g-score{display:flex;gap:24px;text-align:right}
+.g-controls{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.meter{flex:1;min-width:140px;height:14px;border-radius:999px;background:rgba(244,245,239,.12);overflow:hidden}
+.meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--light),#E8D35A 70%,var(--flag));border-radius:999px}
+#gSwing{user-select:none;-webkit-user-select:none;touch-action:none;min-width:170px}
+.g-msg{font-size:18px;font-weight:600;min-height:1.6em;padding:0 4px}
+.g-after{display:flex;gap:12px;flex-wrap:wrap}
+
+/* Bag */
+.bag{background:var(--cream)}
+.kit-stage{background:var(--white);border-radius:22px;padding:14px;box-shadow:0 20px 50px rgba(17,64,47,.14)}
+.kit-stage svg{display:block;width:100%;height:auto;border-radius:14px}
+.kit-bar{display:flex;align-items:center;gap:16px;padding:14px 6px 4px;flex-wrap:wrap}
+#packNote{font-family:var(--display);font-weight:900;text-transform:uppercase;font-size:26px;color:var(--green)}
+.bag-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:22px}
+.bag-card{background:var(--white);border-radius:16px;padding:22px;display:grid;gap:8px;transition:box-shadow .15s}
+.bag-card .num{width:36px;height:36px;border-radius:50%;background:var(--flag);color:#fff;display:grid;place-items:center;font-weight:700}
+.bag-card h3{font-size:30px;color:var(--green)}
+.bag-card p{color:var(--muted)}
+.bag-card.hot{box-shadow:0 0 0 3px var(--flag)}
+.joint{margin-top:28px;background:var(--green);color:var(--cream);border-radius:22px;padding:24px 24px 10px;overflow-x:auto}
+.joint-head{display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap}
+.joint h3{font-size:clamp(30px,3.6vw,44px)}
+.joint svg{display:block;width:100%;min-width:680px;height:auto;margin-top:8px}
+.kit-note{font-size:13px;color:var(--muted);margin-top:14px}
+@media (max-width:900px){.bag-cards{grid-template-columns:1fr 1fr}}
+@media (max-width:560px){.bag-cards{grid-template-columns:1fr}}
+.more{border-top:1px solid var(--line);padding-top:14px;display:grid;gap:12px}
+.more-h{font-family:var(--display);font-weight:900;text-transform:uppercase;font-size:26px;color:var(--green)}
+.more-h small{font-family:var(--body);font-weight:600;font-size:14px;text-transform:none;color:var(--muted);margin-left:6px}
+
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.btn{transition:none}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="wordmark" href="#top">GO GOLF</a>
+    <div class="navlinks">
+      <a href="#bag">What's in the bag</a><a href="#try">Try a hole</a>
+      <a href="#founders">Founding members</a>
+      <a href="#shot">Trick shots</a>
+            <a href="#scorecard">Scorecard</a>
+    </div>
+    <a class="btn sm" href="#founders">Claim your spot</a>
+  </div>
+</nav>
+
+<div id="siteView">
+<header class="hero" id="top">
+  <svg id="banner" viewBox="0 0 1200 500" role="img" aria-label="Go Golf: the two halves of the club slide in, the clubhead spins as it screws tight, and the letters of GO GOLF close together">
+    <defs>
+      <g id="club">
+        <g id="upper">
+          <path d="M104 246 Q96 246 96 256 Q96 266 104 266 L330 263 L330 249 Z"/>
+          <path d="M330 251.5 L600 252 L600 260 L330 260.5 Z"/>
+          <rect x="598" y="253.5" width="40" height="5"/>
+        </g>
+        <g id="lower">
+          <rect id="collar" x="610" y="249" width="26" height="14" rx="3"/>
+          <path d="M636 252 L996 252.5 L996 259.5 L636 260 Z"/>
+          <path id="chead" d="M988 251 L1014 250 Q1022 250 1024 258 L1036 327 Q1038 339 1026 339 L1000 339 Q989 339 988 328 Z"/>
+        </g>
+      </g>
+    </defs>
+    <use href="#club" fill="#7DB58C"/>
+    <g id="threads" stroke="#11402F" stroke-width="1" opacity="0"></g>
+    <g id="bands" fill="#11402F"></g>
+    <circle id="pulse" cx="623" cy="256" r="10" fill="none" stroke="#F2552C" stroke-width="3" opacity="0"/>
+    <text id="w1" x="600" y="330" text-anchor="middle" fill="#F4F5EF">GO GOLF</text>
+  </svg>
+  <div class="wrap hero-copy">
+    <p>A universal golf game. Build a course wherever you want, test your skills and compete with friends, all from one bag.</p>
+    <div class="hero-cta">
+      <a class="btn" href="#founders">Claim your founding spot</a>
+      <div class="counter" id="heroCount" aria-live="polite"></div>
+    </div>
+  </div>
+</header>
+
+
+
+<section class="problem">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><div class="eyebrow">The problem</div><h2>Golf is hard to get to.</h2></div>
+      <p>A real round takes time, money, a ride and a course. When you can't get there, you miss more than practice. You miss the competition, the pressure shots and playing with your friends.</p>
+    </div>
+    <div class="pains">
+      <div class="pain"><b>Tee times</b><p>You plan around the course's schedule, not yours.</p></div>
+      <div class="pain"><b>Cost</b><p>Green fees, gear and getting there add up fast.</p></div>
+      <div class="pain"><b>The course</b><p>No course nearby means no golf.</p></div>
+    </div>
+    <p class="turn">So we made golf <span>you can take anywhere.</span></p>
+  </div>
+</section>
+<section class="dark" id="how">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><div class="eyebrow">The fix</div><h2>A full game of golf in one bag.</h2></div>
+      <p>Screw the club together, drop the cup, and the park, the beach or your backyard becomes the course. You choose where the hole goes and what's in the way.</p>
+    </div>
+    <div class="steps">
+      <div class="step"><div class="n">01</div><h3>Screw it together</h3><p>The two-piece club threads into one solid club.</p></div>
+      <div class="step"><div class="n">02</div><h3>Set your loft</h3><p>Adjust the face and lock it in for the shot you want.</p></div>
+      <div class="step"><div class="n">03</div><h3>Build the hole</h3><p>Drop the target, plant the flag, pick your tee spot.</p></div>
+      <div class="step"><div class="n">04</div><h3>Play and run it back</h3><p>Play 9 or 18. Winner sets the next hole.</p></div>
+    </div>
+
+  </div>
+</section>
+
+<section class="bag" id="bag">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><div class="eyebrow">What's in the bag</div><h2>Everything you need. One bag.</h2></div>
+      <p>The whole game travels with you: a two-piece club, foam balls, a portable cup, a flag and a hitting mat. Pack it up and take it anywhere.</p>
+    </div>
+    <div class="kit-stage">
+      <svg id="kitSvg" viewBox="0 0 1200 700" role="img" aria-label="Everything in the Go Golf bag laid out on the grass: the two-piece club, foam balls, the portable target, the breakdown flag and post, the hitting mat and the bag"></svg>
+      <div class="kit-bar"><button class="btn" type="button" id="packBtn">Pack it up</button><span id="packNote" aria-live="polite"></span></div>
+    </div>
+    <div class="bag-cards">
+      <div class="bag-card" data-k="1"><span class="num">1</span><h3>Two-piece adjustable club</h3><p>The grip section and the clubhead section screw together into one solid club, then come apart to pack. The face adjusts and locks into different lofts.</p></div>
+      <div class="bag-card" data-k="2"><span class="num">2</span><h3>Two kinds of foam balls</h3><p>Standard foam balls for everyday play, plus balls with a firmer outer layer for a different feel off the club.</p></div>
+      <div class="bag-card" data-k="3"><span class="num">3</span><h3>Portable target</h3><p>A circular cup you can drop anywhere. Wherever it lands, that's the hole.</p></div>
+      <div class="bag-card" data-k="4"><span class="num">4</span><h3>Breakdown flag and post</h3><p>Snaps together so everyone can see the pin from the tee, then breaks down small.</p></div>
+      <div class="bag-card" data-k="5"><span class="num">5</span><h3>Hitting mat</h3><p>A consistent spot to tee off from, on sand, grass or anything in between.</p></div>
+      <div class="bag-card" data-k="6"><span class="num">6</span><h3>The carry bag</h3><p>A compact golf bag that holds the whole game, organized and protected. Throw it over your shoulder and go.</p></div>
+    </div>
+    <div class="joint">
+      <div class="joint-head"><div><div class="eyebrow" style="color:var(--light)">The two-piece club</div><h3>Screws together. Comes apart to pack.</h3></div><button class="btn sm cream" type="button" id="jointReplay">Screw it together again</button></div>
+      <svg id="jointSvg" viewBox="0 0 1100 270" role="img" aria-label="The two halves of the Go Golf club slide together and the clubhead spins as it screws tight"></svg>
+    </div>
+    <p class="kit-note">Illustrations. Final dimensions, materials, colors and the loft-lock mechanism are still being designed.</p>
+  </div>
+</section>
+
+<section class="dark loft-sec" id="loft">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><div class="eyebrow">The adjustable face</div><h2>One club. Every shot.</h2></div>
+      <p>Change the loft and the same club plays a low runner, a bump-and-run, an approach or a high shot over whatever's in the way.</p>
+    </div>
+    <div class="kit">
+      <div class="swing-card">
+        <svg id="swingSvg" viewBox="0 0 640 300" role="img" aria-label="A Go Golf club swings and hits the ball; the flight changes with the loft you choose"></svg>
+        <div class="seg" id="loftChips" role="group" aria-label="Choose a loft"></div>
+        <p class="swing-desc" id="loftDesc"></p>
+      </div>
+      <div class="face-card">
+        <svg id="faceSvg" viewBox="0 0 320 240" role="img" aria-label="Close-up of the adjustable Go Golf club face"></svg>
+        <h3>A real iron face</h3>
+        <p>Grooves, a sweet spot and a face that adjusts and locks into different lofts. It's built to feel like a real club when you hit it.</p>
+      </div>
+    </div>
+      </div>
+</section>
+
+<section class="try" id="try">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><div class="eyebrow">Try it</div><h2>Play a hole right now.</h2></div>
+      <p>Pick your loft, hold to power up, let go to swing. Clear what's in the way and get it in the cup.</p>
+    </div>
+    <div class="game">
+      <div class="g-top"><div><span class="g-k">Hole</span><b id="gHole">1 · The beach</b></div><div class="g-score"><div><span class="g-k">Strokes</span><b id="gStrokes">0</b></div><div><span class="g-k">Par</span><b id="gPar">3</b></div></div></div>
+      <svg id="game" viewBox="0 0 640 300" role="img" aria-label="Mini golf game. Choose a loft, hold the swing button to build power and release to hit."></svg>
+      <div class="g-controls">
+        <div class="seg" id="gLoft" role="group" aria-label="Choose a loft"></div>
+        <div class="meter" aria-hidden="true"><i id="gMeter"></i></div>
+        <button class="btn" type="button" id="gSwing">Hold to swing</button>
+      </div>
+      <p class="g-msg" id="gMsg" role="status">Hole 1: chip it over the surfboards.</p>
+      <div class="g-after" id="gAfter" hidden><button class="btn cream" type="button" id="gNext">Next hole</button><a class="btn ghost" href="#founders">Claim your founding spot</a></div>
+    </div>
+  </div>
+</section>
+<section class="story" id="story">
+  <div class="wrap">
+    <figure class="photo"><img src="costa-rica.jpg" alt="Swinging a Go Golf club on a beach in Costa Rica at sunset, with the hitting mat in the sand and the flag set up at the water's edge" loading="lazy"><figcaption>Costa Rica. The mat in the sand, the flag at the water.</figcaption></figure>
+    <div>
+      <div class="eyebrow">Where it started</div>
+      <h2>Golf where you'd never expect it.</h2>
+      <p>We took Go Golf to a beach in Costa Rica. Surfers who had never golfed in their lives walked over and asked if they could play with us.</p>
+      <p>That keeps happening. When people see golf being played somewhere they'd never imagine it, it's shocking and exciting. And it's not just golfers who want in.</p>
+      <p class="pull">Go Golf is a mix of building a hole and <span>daring your friend.</span></p>
+    </div>
+  </div>
+</section>
+
+<section class="founders" id="founders">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><div class="eyebrow">Founding members</div><h2>Get in before everyone else.</h2></div>
+      <p>Join the waitlist and get a numbered founding member card. Invite friends with your link to move up the line.</p>
+    </div>
+    <div class="f-grid">
+      <div>
+        <div class="mcard preview" id="mcard" aria-live="polite">
+          <div class="top"><div class="wm">GO GOLF</div><div class="tag">Founding<br>member</div></div>
+          <svg class="club" viewBox="0 0 520 120" aria-hidden="true"><path d="M8 52 Q2 52 2 58 Q2 64 8 64 L120 62 L120 54 Z" fill="#7DB58C"/><path d="M120 55 L250 55.5 L250 60.5 L120 61 Z" fill="#7DB58C"/><rect x="250" y="53" width="16" height="10" rx="2" fill="#F2552C"/><path d="M266 55.5 L470 56 L470 60 L266 60.5 Z" fill="#7DB58C"/><path d="M464 55 L478 54.5 Q483 54.5 484 59 L491 98 Q492 105 485 105 L470 105 Q464 105 464 99 Z" fill="#7DB58C"/></svg>
+          <div class="num" id="mNum"><span>#</span>0000</div>
+          <div class="name" id="mName">Your name here</div>
+        </div>
+        <div class="me-panel" id="mePanel" hidden>
+          <div class="stats">
+            <div class="stat"><b id="sLine">–</b><span>Your spot in line</span></div>
+            <div class="stat"><b id="sRefs">0</b><span>Friends you've brought</span></div>
+            <div class="stat"><b id="sTotal">–</b><span>Founding members</span></div>
+          </div>
+          <div class="field"><label for="inviteLink">Your invite link <small>· each friend who joins moves you up</small></label>
+            <div class="invite"><input id="inviteLink" type="text" readonly><button class="btn sm green" type="button" id="copyInvite">Copy</button></div>
+          </div>
+          <p class="status" id="inviteStatus" role="status"></p>
+        </div>
+        <div class="board">
+          <h3>Top recruiters</h3>
+          <ol id="board"><li class="empty">No invites yet. The first person to bring a friend takes the top spot.</li></ol>
+        </div>
+      </div>
+      <div>
+        <div class="perks">
+          <div class="perk"><b>Early access</b><p>First in line to order when kits are ready.</p></div>
+          <div class="perk"><b>Founding discount</b><p>A discount on your first kit, for founding members only.</p></div>
+        </div>
+        <form class="join-form" id="joinForm" novalidate>
+          <div class="row2">
+            <div class="field"><label for="jName">First name</label><input id="jName" type="text" maxlength="24" required autocomplete="given-name"></div>
+            <div class="field"><label for="jEmail">Email</label><input id="jEmail" type="email" placeholder="you@example.com" required autocomplete="email"></div>
+          </div>
+          <div class="more"><div class="more-h">3 quick questions <small>Help shape Go Golf</small></div>
+            <div class="field"><label for="jWhere">Where do you wish you could golf but can't?</label><textarea id="jWhere" maxlength="600"></textarea></div>
+            <div class="field"><label for="jBlock">What stops you from golfing more?</label><textarea id="jBlock" maxlength="600"></textarea></div>
+            <div class="field"><label for="jPlay">Do you play golf now? Tell us a little about it.</label><textarea id="jPlay" maxlength="600"></textarea></div>
+          </div>
+          <div><button class="btn" type="submit" id="joinBtn">Claim my founding spot</button></div>
+          <p class="status" id="joinStatus" role="status"></p>
+          <p style="font-size:13px;color:var(--muted)">Your first name shows on the recruiter board. Your email stays private.</p>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="shots" id="shot">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><div class="eyebrow">Trick shot of the week</div><h2>Post your shot. Get the votes.</h2></div>
+      <p>The most unique, craziest trick shot wins. Everyone votes, and each week's winner gets featured. No kit yet? Use whatever you've got.</p>
+    </div>
+    <div class="shot-top">
+      <div class="qr-card"><div id="qr" aria-label="QR code that opens the trick shot upload on your phone"></div><b>Scan to submit</b><small>Opens this page on your phone</small></div>
+      <div class="featured">
+        <div class="lbl">Last week's winner</div>
+        <div id="featured"><div class="ph">The first winner gets featured here.</div></div>
+      </div>
+      <form class="form-dark" id="shotForm" novalidate>
+        <div class="field"><label for="sName">Name or handle</label><input id="sName" type="text" maxlength="40" required></div>
+        <div class="field"><label for="sDesc">Describe the shot</label><textarea id="sDesc" maxlength="200" placeholder="Off the mat, over the cooler, off the trash can, into the cup" style="min-height:60px"></textarea></div>
+        <div class="file-drop"><label for="sVideo">Choose a video (up to 20 MB)</label><br><input id="sVideo" type="file" accept="video/*"></div>
+        <button class="btn" type="submit" id="shotBtn">Submit my shot</button>
+        <p class="status" id="shotStatus" role="status"></p>
+      </form>
+    </div>
+    <p class="wall-note" id="wallNote">This week's shots show up here. One vote per person per week.</p>
+    <div class="shot-wall" id="shotWall"></div>
+  </div>
+</section>
+
+<section id="dare">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><div class="eyebrow">Build a hole, dare a friend</div><h2>Make a hole. Send the dare.</h2></div>
+      <p>Pick a spot, set the target, add whatever's in the way and send it to the friend who talks the most.</p>
+    </div>
+    <div class="build-grid">
+      <form class="form" id="holeForm" autocomplete="off">
+        <div class="field"><label for="hSpot">Where are you playing?</label><input id="hSpot" type="text" maxlength="40" value="The beach"></div>
+        <div class="row2">
+          <div class="field"><label for="hTee">Tee off from</label><input id="hTee" type="text" maxlength="60" value="The lifeguard tower"></div>
+          <div class="field"><label for="hPin">Put the target</label><input id="hPin" type="text" maxlength="60" value="Between the two palm trees"></div>
+        </div>
+        <div class="field"><label for="hObs">What's in the way?</label><input id="hObs" type="text" maxlength="80" value="The tide line and a row of surfboards"></div>
+        <div class="row2">
+          <div class="field"><label for="hShot">Shot to call</label><input id="hShot" type="text" maxlength="40" value="Low runner"></div>
+          <div class="field"><label for="hPar">Strokes to beat</label><select id="hPar"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option></select></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label for="hFrom">Your name</label><input id="hFrom" type="text" maxlength="30" value="Talan"></div>
+          <div class="field"><label for="hTo">Daring</label><input id="hTo" type="text" maxlength="30" placeholder="Your friend's name"></div>
+        </div>
+        <div class="field"><label for="hTalk">Trash talk</label><input id="hTalk" type="text" maxlength="80" value="No way you make that."></div>
+      </form>
+      <div class="dare">
+        <div class="card" aria-live="polite">
+          <div class="card-top">
+            <div><div class="k">Go Golf dare</div><div class="t" id="cSpot"></div></div>
+            <div class="par">Beat<b id="cPar">3</b>strokes</div>
+          </div>
+          <dl>
+            <dt>Tee</dt><dd id="cTee"></dd>
+            <dt>Target</dt><dd id="cPin"></dd>
+            <dt>In the way</dt><dd id="cObs"></dd>
+            <dt>The shot</dt><dd id="cShot"></dd>
+          </dl>
+          <div class="card-talk" id="cTalk"></div>
+          <div class="card-from" id="cFrom"></div>
+        </div>
+        <div style="display:flex;gap:12px;margin-top:20px;flex-wrap:wrap"><button class="btn green" type="button" id="copyDare">Copy the dare</button><a class="btn ghost" href="#scorecard" style="color:var(--green)">Open the scorecard</a></div>
+        <p class="status" id="dareStatus" role="status" style="margin-top:10px"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="dark" id="rivals">
+  <div class="wrap riv-grid">
+    <div>
+      <div class="eyebrow">Coming with the app</div>
+      <h2>Rivalries that keep score.</h2>
+      <p class="muted" style="margin-top:18px;max-width:44ch">Every round you play with friends adds to your head-to-head record. Know exactly who you owe a rematch.</p>
+      <div class="riv-list">
+        <div><b>01</b><span>Head-to-head records with every friend you play</span></div>
+        <div><b>02</b><span>Streaks, comebacks and your best holes</span></div>
+        <div><b>03</b><span>Rematch with one tap. Winner sets the first hole.</span></div>
+      </div>
+    </div>
+    <div class="riv" aria-label="Example rivalry card">
+      <div class="ex">Example rivalry</div>
+      <div class="h2h">
+        <div class="p"><b>You</b></div>
+        <div class="score">7<span>–</span>4</div>
+        <div class="p"><b>Sam</b></div>
+      </div>
+      <div class="form-strip" aria-label="Last five rounds: win, win, loss, win, win"><i class="w">W</i><i class="w">W</i><i class="l">L</i><i class="w">W</i><i class="w">W</i></div>
+      <div class="riv-row"><span>Rounds played</span><b>11</b></div>
+      <div class="riv-row"><span>Holes won</span><b>58 – 41</b></div>
+      <div class="riv-row"><span>Best hole</span><b>Ace off the lifeguard tower</b></div>
+      <a class="btn" href="#founders" style="justify-self:start">Get early access</a>
+    </div>
+  </div>
+</section>
+</div>
+
+<div id="scorecardView" hidden>
+  <div class="sc-head">
+    <div class="wrap">
+      <a href="#top" class="eyebrow" style="text-decoration:none;color:var(--light)">← Back to Go Golf</a>
+      <h1 style="margin-top:10px">Scorecard</h1>
+      <p>Add your players, write down each hole you build and tap in strokes as you go. Lowest total wins. Winner of each hole sets the next one.</p>
+      <div class="sc-controls">
+        <div><div class="lbl2">Holes</div><div class="seg" id="holeCount"><button type="button" data-n="9">9 holes</button><button type="button" data-n="18">18 holes</button></div></div>
+        <div><div class="lbl2">Players</div><div class="players" id="players"></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="sc-body">
+    <div class="wrap">
+      <div class="table-wrap"><table id="scTable"></table></div>
+      <p class="leaderboard" id="leader"></p>
+      <div class="sc-actions">
+        <button class="btn green" type="button" id="copyScore">Copy results</button>
+        <button class="btn ghost" type="button" id="newRound" style="color:var(--green)">New round</button>
+        <span class="status" id="scStatus" role="status"></span>
+      </div>
+      <p style="font-size:13px;color:var(--muted);margin-top:14px">Scores save on this phone only. These are house rules for keeping track, not official Go Golf rules.</p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span class="wordmark">GO GOLF</span>
+    <span><a href="#scorecard">Scorecard</a> · <a href="#founders">Founding members</a> · Product details are in development and may change.</span>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+(function(){
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const NS='http://www.w3.org/2000/svg';
+const $=id=>document.getElementById(id);
+const el=(tag,at,parent)=>{const e=document.createElementNS(NS,tag);for(const k in at)e.setAttribute(k,at[k]);if(parent)parent.appendChild(e);return e};
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const seg=(t,a,b)=>clamp((t-a)/(b-a),0,1);
+const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+const out=t=>1-Math.pow(1-t,3);
+const SITE_URL=location.origin+location.pathname.replace(/index\.html$/,'');
+
+/* ---------- Routing ---------- */
+let pendingRef=null;
+function route(){
+  const h=location.hash;
+  if(h.startsWith('#ref-')){pendingRef=h.slice(5).replace(/[^a-z0-9]/gi,'').slice(0,12);try{sessionStorage.setItem('gg-ref',pendingRef)}catch(e){}
+    $('siteView').hidden=false;$('scorecardView').hidden=true;const f=$('founders');if(f)setTimeout(()=>f.scrollIntoView(),50);return}
+  const sc=h==='#scorecard';
+  $('siteView').hidden=sc;$('scorecardView').hidden=!sc;
+  if(sc){window.scrollTo(0,0);renderScore()}
+  else if(h&&h.length>1){const t=document.querySelector(h);if(t)t.scrollIntoView()}
+}
+window.addEventListener('hashchange',route);
+try{pendingRef=pendingRef||sessionStorage.getItem('gg-ref')}catch(e){}
+
+/* ---------- Hero banner: the club screws together ---------- */
+(function(){
+  const up=$('upper'),low=$('lower'),head=$('chead'),w1=$('w1'),th=$('threads'),bands=$('bands'),pulse=$('pulse');
+  for(let i=0;i<10;i++)el('line',{x1:598+i*4,y1:253.5,x2:600+i*4,y2:258.5},th);
+  const bandEls=[0,1,2].map(()=>el('rect',{x:611,width:24,height:1.6,rx:.8,opacity:.55},bands));
+  let size=200,lsStart=40,lsMid=20,lsEnd=2;
+  async function fit(){
+    try{await document.fonts.load('900 300px "Big Shoulders Display"')}catch(e){}
+    w1.style.fontFamily='var(--display)';w1.style.fontWeight=900;w1.setAttribute('font-size',300);w1.setAttribute('letter-spacing',0);
+    const len=w1.getComputedTextLength()||1;size=Math.min(260,300*640/len);w1.setAttribute('font-size',size.toFixed(1));
+    const tight=w1.getComputedTextLength();lsEnd=size*.01;lsStart=Math.max(20,(1120-tight)/6);lsMid=lsEnd+(lsStart-lsEnd)*.45;
+    w1.setAttribute('y',(256+size*.36).toFixed(1));
+  }
+  const GAP=48,TURNS=3;
+  function state(t){
+    const s={upX:0,lowX:0,spin:0,ls:lsEnd,thr:0,pulse:null};
+    if(t<1300){const u=ease(t/1300);s.upX=-720*(1-u)-GAP*u;s.lowX=700*(1-u);s.ls=lsStart+(lsMid-lsStart)*u;s.thr=u;return s}
+    if(t<3000){const u=ease((t-1300)/1700);s.upX=-GAP*(1-u);s.spin=u*TURNS*2*Math.PI;s.ls=lsMid+(lsEnd-lsMid)*u;s.thr=1-u;return s}
+    const c=Math.min(1,(t-3000)/420);s.spin=TURNS*2*Math.PI;s.ls=lsEnd-Math.sin(c*Math.PI)*size*.012;s.pulse=c;return s;
+  }
+  function render(s){
+    up.setAttribute('transform',`translate(${s.upX.toFixed(2)} 0)`);low.setAttribute('transform',`translate(${s.lowX.toFixed(2)} 0)`);
+    let c=Math.cos(s.spin);if(Math.abs(c)<.06)c=c<0?-.06:.06;
+    head.setAttribute('transform',`translate(0 256) scale(1 ${c.toFixed(3)}) translate(0 -256)`);
+    th.setAttribute('transform',`translate(${s.upX.toFixed(2)} 0)`);th.setAttribute('opacity',(s.thr*.8).toFixed(2));
+    bandEls.forEach((b,i)=>{const ph=s.spin+i*2*Math.PI/3;b.setAttribute('y',(256+Math.sin(ph)*5-.8).toFixed(1));b.setAttribute('opacity',Math.cos(ph)>0?.55:0)});
+    w1.setAttribute('letter-spacing',s.ls.toFixed(2));
+    if(s.pulse!=null){pulse.setAttribute('opacity',(1-s.pulse).toFixed(2));pulse.setAttribute('r',(10+s.pulse*46).toFixed(1))}else pulse.setAttribute('opacity',0);
+  }
+  fit().then(()=>{if(reduce){render(state(99999));return}const t0=performance.now();(function loop(now){const t=now-t0;render(state(t));if(t<3500)requestAnimationFrame(loop)})(t0)});
+})();
+
+
+/* ---------- Club drawing: realistic iron seen from the toe (shows loft) ---------- */
+const LOFTS=[
+  {name:'Low',deg:10,launch:12,roll:.55,desc:'Keep it under the branches. A low face sends it skimming toward the cup.'},
+  {name:'Bump-and-run',deg:22,launch:24,roll:.38,desc:'Land it short and let it roll the rest of the way in.'},
+  {name:'Approach',deg:36,launch:40,roll:.12,desc:'Fly it at the flag and stop it close.'},
+  {name:'High',deg:54,launch:60,roll:.04,desc:'Open the face, clear the obstacle and drop it soft.'}
+];
+function ironToe(loftDeg,s){
+  // simple iron head seen from the toe; it rotates around the hosel to open the face as loft goes up
+  return `<g transform="rotate(${(-loftDeg*.75).toFixed(1)})"><path d="M${-2*s} ${-6*s} L${2*s} ${-6*s} L${3*s} ${1*s} L${-3*s} ${1*s} Z" fill="#9AA6A0"/><path d="M${-3*s} 0 L${3*s} 0 L${7*s} ${22*s} Q${7.5*s} ${26*s} ${3.5*s} ${26*s} L${-7*s} ${26*s} Q${-10.5*s} ${26*s} ${-9.5*s} ${22*s} Z" fill="url(#ironSteel)" stroke="#6F7C76" stroke-width="${(.8*s).toFixed(2)}" stroke-linejoin="round"/><path d="M${3.2*s} ${1.5*s} L${6.4*s} ${21*s}" stroke="#FFFFFF" stroke-width="${(1.2*s).toFixed(2)}" stroke-linecap="round" opacity=".9"/></g>`;
+}
+function ensureSteel(svg){
+  if(svg.querySelector('#ironSteel'))return;
+  const d=svg.querySelector('defs')||el('defs',{},svg);
+  d.insertAdjacentHTML('beforeend',`<linearGradient id="ironSteel" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F5F7F6"/><stop offset=".5" stop-color="#C5CDC9"/><stop offset="1" stop-color="#8E9994"/></linearGradient>
+  <linearGradient id="shaftSteel" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8E9994"/><stop offset=".45" stop-color="#F2F4F3"/><stop offset="1" stop-color="#A9B3AE"/></linearGradient>`);
+}
+function clubAt(g,hx,hy,len,ang,loft,scale){
+  const s=scale||1;g.innerHTML='';
+  const deg=ang*180/Math.PI;
+  // draw straight down in local space then rotate about the hands
+  const gripL=len*.27,joint=len*.55;
+  g.insertAdjacentHTML('beforeend',`<g transform="translate(${hx.toFixed(1)} ${hy.toFixed(1)}) rotate(${(-deg).toFixed(1)})">
+    <rect x="${(-1.6*s).toFixed(1)}" y="${gripL.toFixed(1)}" width="${(3.2*s).toFixed(1)}" height="${(len-gripL).toFixed(1)}" fill="url(#shaftSteel)"/>
+    <rect x="${(-2.6*s).toFixed(1)}" y="${(joint-4*s).toFixed(1)}" width="${(5.2*s).toFixed(1)}" height="${(8*s).toFixed(1)}" rx="${(1*s).toFixed(1)}" fill="#7DB58C"/>
+    <path d="M${(-4.4*s).toFixed(1)} 0 L${(4.4*s).toFixed(1)} 0 L${(3.4*s).toFixed(1)} ${gripL.toFixed(1)} L${(-3.4*s).toFixed(1)} ${gripL.toFixed(1)} Z" fill="#1A2620"/>
+    <rect x="${(-4.6*s).toFixed(1)}" y="${(-1.5*s).toFixed(1)}" width="${(9.2*s).toFixed(1)}" height="${(3*s).toFixed(1)}" rx="${(1.5*s).toFixed(1)}" fill="#0E1611"/>
+    <g transform="translate(0 ${len.toFixed(1)})">${ironToe(loft,s)}</g>
+  </g>`);
+}
+
+/* ---------- Swing demo ---------- */
+(function(){
+  const svg=$('swingSvg');
+  const defs=el('defs',{},svg);const sk=el('linearGradient',{id:'swSky',x1:0,y1:0,x2:0,y2:1},defs);el('stop',{offset:0,'stop-color':'#9ED3EA'},sk);el('stop',{offset:1,'stop-color':'#E4F2EC'},sk);
+  ensureSteel(svg);
+  el('rect',{width:640,height:300,fill:'url(#swSky)'},svg);
+  el('circle',{cx:540,cy:64,r:26,fill:'#F6C445'},svg);
+  el('path',{d:'M0 214 Q160 190 320 208 T640 200 L640 240 L0 240Z',fill:'#4C9A5C'},svg);
+  el('rect',{y:240,width:640,height:60,fill:'#69B565'},svg);
+  for(let i=0;i<8;i++)el('rect',{x:i*80,y:240,width:40,height:60,fill:'#73BD6D',opacity:.7},svg);
+  el('rect',{x:338,y:198,width:10,height:44,fill:'#6C4424'},svg);el('circle',{cx:343,cy:182,r:30,fill:'#2F7D44'},svg);el('circle',{cx:322,cy:196,r:20,fill:'#3C8A4E'},svg);el('circle',{cx:362,cy:194,r:21,fill:'#3C8A4E'},svg);
+  el('ellipse',{cx:566,cy:242,rx:30,ry:7,fill:'#F4F5EF',stroke:'#10241A','stroke-width':1.5},svg);el('ellipse',{cx:566,cy:242,rx:22,ry:4.5,fill:'#1C2A22'},svg);
+  el('line',{x1:569,y1:242,x2:569,y2:176,stroke:'#F4F5EF','stroke-width':3},svg);el('path',{d:'M571 177 q15 -4 28 6 q-13 4 -28 11Z',fill:'#F2552C'},svg);
+  el('path',{d:'M90 248 L108 236 L176 236 L158 248Z',fill:'#2E7D4A'},svg);
+  const trail=el('path',{fill:'none',stroke:'#FFFFFF','stroke-width':2.4,'stroke-dasharray':'1.5 7','stroke-linecap':'round'},svg);
+  const clubG=el('g',{},svg);
+  const ball=el('circle',{r:5.5,fill:'#fff',stroke:'#B9C2BD'},svg);
+  // close-up inset of the head so the loft is easy to see
+  const inset=el('g',{transform:'translate(70 70)'},svg);
+  const label=el('text',{x:16,y:28,'font-family':'Big Shoulders Display, sans-serif','font-weight':700,'font-size':20,'letter-spacing':2,fill:'#11402F'},svg);
+  const HX=136,HY=60,LEN=150,BX=150,BY=236;
+  let li=2,raf;const chips=$('loftChips');
+  LOFTS.forEach((l,i)=>{const b=document.createElement('button');b.type='button';b.textContent=l.name;b.onclick=()=>{li=i;play()};chips.appendChild(b)});
+  let insetDeg=null,insetRaf;function drawInset(l){const to=l.deg,from=insetDeg==null?to:insetDeg;cancelAnimationFrame(insetRaf);const t0=performance.now();const step=now=>{const u=reduce?1:ease(seg(now-t0,0,450));insetDeg=from+(to-from)*u;drawInsetAt(insetDeg);if(u<1)insetRaf=requestAnimationFrame(step)};insetRaf=requestAnimationFrame(step)}
+  function drawInsetAt(deg){const l={deg};inset.innerHTML=`<circle r="44" fill="#F4F5EF" stroke="#11402F" stroke-width="3"/><clipPath id="insClip"><circle r="41"/></clipPath><g clip-path="url(#insClip)"><rect x="-44" y="22" width="88" height="30" fill="#69B565"/><g transform="translate(0 -34)"><rect x="-2.6" y="-30" width="5.2" height="30" fill="url(#shaftSteel)"/>${ironToe(l.deg,2.1)}</g></g>`;inset.setAttribute('transform','translate(590 120)')}
+  function play(){
+    cancelAnimationFrame(raf);const l=LOFTS[li];
+    [...chips.children].forEach((b,i)=>b.setAttribute('aria-pressed',i===li));$('loftDesc').textContent=l.desc;label.textContent='LOFT · '+l.name.toUpperCase();drawInset(l);
+    const land={0:.8,1:.5,2:.94,3:.97}[li],peak={0:26,1:52,2:118,3:178}[li];const lx=BX+(566-BX)*land;
+    const pts=[];for(let k=0;k<=40;k++){const s=k/40;pts.push([BX+(lx-BX)*s,BY-Math.sin(Math.PI*s)*peak])}if(li<2)pts.push([566,BY]);
+    if(reduce){clubAt(clubG,HX,HY,LEN,1.4,l.deg);trail.setAttribute('d','M'+pts.map(p=>p.join(' ')).join(' L'));ball.setAttribute('cx',566);ball.setAttribute('cy',BY);return}
+    const t0=performance.now();
+    const loop=now=>{const t=now-t0;let a;
+      if(t<600)a=-1.95*out(t/600);else if(t<820)a=-1.95+1.95*Math.pow(seg(t,600,820),2);else a=1.55*out(seg(t,820,1250));
+      clubAt(clubG,HX,HY,LEN,a,l.deg);
+      const v=seg(t,820,2300);const n=Math.max(1,Math.round(v*(pts.length-1)));const vis=pts.slice(0,n+1);
+      trail.setAttribute('d',t>820?'M'+vis.map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' L'):'');
+      const p=t<820?[BX,BY]:vis[vis.length-1];ball.setAttribute('cx',p[0]);ball.setAttribute('cy',p[1]);
+      if(t<2600)raf=requestAnimationFrame(loop)};
+    raf=requestAnimationFrame(loop);
+  }
+  ball.setAttribute('cx',BX);ball.setAttribute('cy',BY);
+  clubAt(clubG,HX,HY,LEN,0,LOFTS[li].deg);drawInset(LOFTS[li]);[...chips.children].forEach((b,i)=>b.setAttribute('aria-pressed',i===li));$('loftDesc').textContent=LOFTS[li].desc;label.textContent='LOFT · '+LOFTS[li].name.toUpperCase();
+  const io=new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)){play();io.disconnect()}},{threshold:.4});io.observe(svg);
+})();
+
+/* ---------- Iron face, face-on ---------- */
+function ironFace(){
+  // 320 x 240 space: hosel rises from the heel on the left, toe on the right
+  let g='';
+  for(let i=0;i<12;i++){const y=118+i*5.6;const x0=108+i*.8,x1=244-i*2.6-(i>8?(i-8)*6:0);g+=`<path d="M${x0} ${y} L${x1} ${y+1.6}" stroke="#6F7C76" stroke-width="2.4" stroke-linecap="round"/><path d="M${x0} ${y+1.3} L${x1} ${y+2.9}" stroke="#FFFFFF" stroke-width=".8" opacity=".55"/>`}
+  return `<defs>
+    <linearGradient id="fSteel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F6F8F7"/><stop offset=".55" stop-color="#CBD3CF"/><stop offset="1" stop-color="#97A39D"/></linearGradient>
+    <linearGradient id="fFace" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#C8D0CC"/><stop offset=".5" stop-color="#E6EBE8"/><stop offset="1" stop-color="#C2CAC6"/></linearGradient>
+    <linearGradient id="fHosel" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8E9994"/><stop offset=".45" stop-color="#EEF1EF"/><stop offset="1" stop-color="#9AA5A0"/></linearGradient>
+    <radialGradient id="fSweet" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#FFFFFF" stop-opacity=".5"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="320" height="240" fill="#E9EDE7"/>
+  <rect x="104" y="0" width="7" height="34" fill="url(#fHosel)" transform="rotate(8 107 34)"/>
+  <path d="M102 30 L113 30 L114 42 L101 42 Z" fill="#141C18" transform="rotate(8 107 34)"/>
+  <path d="M100 42 L116 42 L112 104 Q110 116 98 122 L86 118 Q96 104 98 84 Z" fill="url(#fHosel)" stroke="#6F7C76" stroke-width="1.2"/>
+  <path d="M96 116 Q120 104 170 102 Q232 98 268 90 Q292 86 298 104 Q304 130 300 166 Q296 196 270 200 L120 204 Q86 205 74 190 Q66 178 72 160 Q80 132 96 116 Z" fill="url(#fSteel)" stroke="#5E6B65" stroke-width="1.6"/>
+  <path d="M102 122 Q140 110 180 108 Q236 104 266 98 Q284 96 288 110 Q293 134 290 164 Q287 186 268 189 L124 192 Q94 193 86 182 Q80 172 84 156 Q90 134 102 122 Z" fill="url(#fFace)"/>
+  ${g}
+  <ellipse cx="172" cy="148" rx="44" ry="24" fill="url(#fSweet)"/>
+  <path d="M80 190 Q100 202 124 202 L270 198" fill="none" stroke="#FFFFFF" stroke-width="2.2" opacity=".75"/>
+  <path d="M100 120 Q160 104 266 96" fill="none" stroke="#FFFFFF" stroke-width="1.6" opacity=".8"/>
+  <text x="262" y="182" font-family="Big Shoulders Display, sans-serif" font-weight="900" font-size="13" fill="#7E8B85" letter-spacing="1" transform="rotate(-2 262 182)">GO</text>
+  <g font-family="Big Shoulders Display, sans-serif" font-weight="700" font-size="15" letter-spacing="1.5" fill="#11402F">
+    <line x1="210" y1="134" x2="240" y2="40" stroke="#11402F" stroke-width="1.2"/><text x="200" y="34">ADJUSTABLE FACE</text>
+    <line x1="112" y1="60" x2="40" y2="60" stroke="#11402F" stroke-width="1.2"/><text x="12" y="54">HOSEL</text>
+  </g>`;
+}
+$('faceSvg').innerHTML=ironFace();
+
+/* ---------- What's in the bag: detailed flat lay with pack/unpack ---------- */
+(function(){
+  const svg=$('kitSvg');if(!svg)return;
+  const r=(seed=>()=>{seed=(seed*9301+49297)%233280;return seed/233280})(11);
+  let s=`<defs>
+    <pattern id="kGrass" width="120" height="120" patternUnits="userSpaceOnUse" patternTransform="rotate(-24)"><rect width="120" height="120" fill="#5FAE5F"/><rect width="60" height="120" fill="#67B866"/></pattern>
+    <linearGradient id="kSteel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#A3AEA9"/><stop offset=".35" stop-color="#F4F6F5"/><stop offset=".7" stop-color="#C7CFCB"/><stop offset="1" stop-color="#8A9590"/></linearGradient>
+    <linearGradient id="kGrip" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3A4741"/><stop offset=".4" stop-color="#1E2923"/><stop offset="1" stop-color="#0C120F"/></linearGradient>
+    <linearGradient id="kPole" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C9D1CD"/><stop offset=".4" stop-color="#FFFFFF"/><stop offset="1" stop-color="#B7C0BB"/></linearGradient>
+    <radialGradient id="kBallW" cx=".38" cy=".32" r=".7"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".7" stop-color="#ECEFED"/><stop offset="1" stop-color="#C9D0CC"/></radialGradient>
+    <radialGradient id="kBallG" cx=".38" cy=".32" r=".7"><stop offset="0" stop-color="#C8E8CF"/><stop offset=".7" stop-color="#8CC79B"/><stop offset="1" stop-color="#5E9D6E"/></radialGradient>
+    <radialGradient id="kRim" cx=".5" cy=".5" r=".5"><stop offset=".86" stop-color="#E2E7E4"/><stop offset=".93" stop-color="#FFFFFF"/><stop offset="1" stop-color="#B8C1BC"/></radialGradient>
+    <pattern id="kFabric" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="#123F2E"/><rect width="4" height="8" fill="#15452F"/></pattern>
+    <filter id="kSh" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="8" stdDeviation="7" flood-color="#163A20" flood-opacity=".42"/></filter>
+    <filter id="kShS" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="3" stdDeviation="2.5" flood-color="#163A20" flood-opacity=".45"/></filter>
+  </defs>
+  <rect width="1200" height="700" fill="url(#kGrass)"/>`;
+  for(let i=0;i<900;i++){const x=r()*1200,y=r()*700,a=(r()-.5)*1.2;s+=`<path d="M${x.toFixed(0)} ${y.toFixed(0)} l${(Math.sin(a)*5).toFixed(1)} ${(-6-r()*4).toFixed(1)}" stroke="${r()>.5?'#4F9F51':'#78C277'}" stroke-width="1.3" opacity=".55"/>`}
+  const items={};
+  const item=(k,body,cx,cy)=>{items[k]={cx,cy};return `<g class="kit-item" data-k="${k}" data-cx="${cx}" data-cy="${cy}">${body}</g>`};
+
+  // 6 · the bag (closed duffel, top-down)
+  let bag=`<g filter="url(#kSh)">
+    <path d="M118 446 L408 452 Q440 453 444 486 L446 560 Q444 592 410 594 L118 600 Q96 600 96 578 L96 468 Q96 446 118 446 Z" fill="url(#kFabric)"/>
+    <path d="M118 446 L408 452 Q440 453 444 486 L446 560 Q444 592 410 594 L118 600 Q96 600 96 578 L96 468 Q96 446 118 446 Z" fill="none" stroke="#2C664C" stroke-width="4"/>
+  </g>
+  <path d="M404 452 Q446 452 450 486 L452 560 Q450 594 404 594 Q428 560 428 523 Q428 486 404 452Z" fill="#0A2419"/>
+  <ellipse cx="94" cy="523" rx="30" ry="80" fill="#0A2419" stroke="#7DB58C" stroke-width="4"/>
+  <ellipse cx="94" cy="523" rx="20" ry="66" fill="#06170F"/>
+  <path d="M74 523 L114 523 M94 460 L94 586 M80 480 L108 566 M108 480 L80 566" stroke="#2C664C" stroke-width="3"/>
+  <path d="M128 452 L436 466" stroke="#2C3A33" stroke-width="5" stroke-linecap="round"/><path d="M128 594 L436 580" stroke="#2C3A33" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="436" cy="466" r="6" fill="#1A2620"/><circle cx="436" cy="580" r="6" fill="#1A2620"/>
+  <path d="M150 446 Q260 392 370 450" fill="none" stroke="#0A2419" stroke-width="20" stroke-linecap="round"/>
+  <path d="M150 446 Q260 392 370 450" fill="none" stroke="#2C664C" stroke-width="2" stroke-dasharray="4 4"/>
+  <rect x="236" y="398" width="54" height="22" rx="9" fill="#2C3A33"/>
+  <path d="M140 548 L360 546 Q384 546 384 566 Q384 586 360 588 L140 590 Q126 590 126 576 L126 562 Q126 548 140 548Z" fill="#0F3828" stroke="#2C664C" stroke-width="3"/>
+  <path d="M140 556 L370 554" stroke="#0A2419" stroke-width="4"/>
+  ${Array.from({length:28},(_,i)=>`<rect x="${142+i*8}" y="553.5" width="3.5" height="5" fill="#9AA6A0"/>`).join('')}
+  <g id="zipPull" transform="translate(150 556)"><rect x="-5" y="-7" width="10" height="14" rx="3" fill="#C9D1CD" stroke="#5E6B65"/><rect x="-3.5" y="6" width="7" height="18" rx="3.5" fill="#F2552C"/></g>
+  <rect x="300" y="478" width="96" height="58" rx="18" fill="#0F3828" stroke="#2C664C" stroke-width="3"/>
+  <rect x="310" y="492" width="76" height="30" rx="5" fill="#F4F5EF"/><text x="348" y="514" text-anchor="middle" font-family="Big Shoulders Display, sans-serif" font-weight="900" font-size="20" fill="#11402F">GO GOLF</text>
+  <path d="M150 470 L280 472" stroke="#7DB58C" stroke-width="1.4" stroke-dasharray="5 4" opacity=".7"/>`;
+  s+=`<g id="kitBag" data-k="6">${bag}</g>`;
+
+  // 1 · club, upper piece (grip + shaft + male thread)
+  let up=`<g filter="url(#kSh)"><path d="M80 66 Q70 66 70 80 Q70 94 80 94 L300 89 L300 71 Z" fill="url(#kGrip)"/>`;
+  for(let x=86;x<296;x+=8)up+=`<path d="M${x} 68 l7 24" stroke="#45544C" stroke-width="1.3" opacity=".8"/>`;
+  up+=`<rect x="70" y="72" width="8" height="16" rx="3" fill="#0A0F0C"/><circle cx="74" cy="80" r="3" fill="#7DB58C"/>
+    <rect x="180" y="68" width="40" height="24" fill="#11402F" opacity=".9"/><text x="200" y="85" text-anchor="middle" font-family="Big Shoulders Display, sans-serif" font-weight="900" font-size="12" fill="#F4F5EF">GO GOLF</text>
+    <path d="M300 73 L312 74.5 L312 85.5 L300 87 Z" fill="#0E1611"/>
+    <rect x="312" y="75.5" width="244" height="9" fill="url(#kSteel)"/>
+    <rect x="556" y="77" width="30" height="6" fill="#9AA6A0"/>${Array.from({length:10},(_,i)=>`<path d="M${557+i*3} 77 l1.6 6" stroke="#5E6B65" stroke-width=".9"/>`).join('')}</g>`;
+  s+=item(1,up,330,80);
+  // 1 · club, lower piece (collar + shaft + head face-on)
+  let lo=`<g filter="url(#kSh)"><rect x="626" y="71" width="30" height="18" rx="3" fill="url(#kSteel)" stroke="#6F7C76"/>${Array.from({length:8},(_,i)=>`<line x1="${630+i*3.3}" y1="71" x2="${630+i*3.3}" y2="89" stroke="#7E8B85" stroke-width="1"/>`).join('')}
+    <rect x="654" y="71" width="4" height="18" fill="#F2552C"/>
+    <rect x="658" y="75.5" width="398" height="9" fill="url(#kSteel)"/>
+    <g transform="translate(1054 10) matrix(0 1 1 0 0 0) scale(.62)">${ironFace().replace(/<rect width="320" height="240" fill="#E9EDE7"\/>/,'').replace(/<g font-family[\s\S]*<\/g>/,'').replace(/<text x="262"[^>]*>GO<\/text>/,'').replace(/id="f/g,'id="kf').replace(/url\(#f/g,'url(#kf')}</g></g>`;
+  s+=item(1,lo,860,100);
+
+  // 5 · hitting mat
+  let mat=`<g filter="url(#kSh)"><rect x="500" y="230" width="330" height="220" rx="16" fill="#1C2620"/><rect x="510" y="240" width="310" height="200" rx="10" fill="#2F8A4C"/></g>`;
+  for(let i=0;i<34;i++)mat+=`<rect x="${510+i*9.4}" y="240" width="4.7" height="200" fill="#38955A" opacity=".55"/>`;
+  for(let i=0;i<700;i++){const x=512+r()*306,y=242+r()*196;mat+=`<path d="M${x.toFixed(1)} ${y.toFixed(1)} l${(r()*2-1).toFixed(1)} -3.4" stroke="${r()>.5?'#5DB477':'#22713D'}" stroke-width="1"/>`}
+  mat+=`<circle cx="610" cy="340" r="11" fill="#141C18"/><circle cx="610" cy="340" r="6" fill="#2A3530"/>
+    <rect x="726" y="410" width="80" height="22" rx="4" fill="#F4F5EF"/><text x="766" y="426" text-anchor="middle" font-family="Big Shoulders Display, sans-serif" font-weight="900" font-size="14" fill="#11402F">GO GOLF</text>`;
+  s+=item(5,mat,665,340);
+
+  // 3 · portable target (cup with net)
+  let tg=`<g filter="url(#kSh)"><circle cx="1010" cy="350" r="132" fill="url(#kRim)"/></g><circle cx="1010" cy="350" r="114" fill="#16211B"/>`;
+  for(let i=0;i<24;i++){const a=i/24*Math.PI*2;tg+=`<line x1="1010" y1="350" x2="${(1010+Math.cos(a)*114).toFixed(1)}" y2="${(350+Math.sin(a)*114).toFixed(1)}" stroke="#34463C" stroke-width="1.4"/>`}
+  [96,76,56,36].forEach(rr=>tg+=`<circle cx="1010" cy="350" r="${rr}" fill="none" stroke="#34463C" stroke-width="1.4"/>`);
+  tg+=`<circle cx="1010" cy="350" r="18" fill="#0B110E"/><circle cx="1010" cy="350" r="122" fill="none" stroke="#F2552C" stroke-width="4"/>
+    <rect x="1124" y="342" width="22" height="16" rx="4" fill="#2A3530"/><circle cx="1135" cy="350" r="5" fill="#0B110E"/>
+    <path d="M915 270 A132 132 0 0 1 1060 228" fill="none" stroke="#FFFFFF" stroke-width="5" opacity=".7" stroke-linecap="round"/>`;
+  s+=item(3,tg,1010,350);
+
+  // 4 · breakdown flag and post (three sections + flag)
+  let fl='';const seg3=(x,y,len,ang)=>`<g transform="translate(${x} ${y}) rotate(${ang})" filter="url(#kShS)"><rect x="0" y="-5" width="${len}" height="10" rx="5" fill="url(#kPole)"/><rect x="${len-16}" y="-6" width="16" height="12" rx="3" fill="#2A3530"/><rect x="0" y="-5" width="10" height="10" rx="3" fill="#9AA6A0"/></g>`;
+  fl+=seg3(560,520,240,-4)+seg3(565,556,240,-4)+seg3(570,592,226,-4);
+  fl+=`<g filter="url(#kSh)" transform="translate(806 506) rotate(-6)"><path d="M0 0 L170 22 Q156 60 170 98 L0 110 Z" fill="#F2552C"/><path d="M0 0 L22 2 L22 108 L0 110 Z" fill="#F4F5EF"/>${[14,40,66,92].map(y=>`<circle cx="11" cy="${y}" r="3" fill="#C9D1CD" stroke="#7E8B85"/>`).join('')}<path d="M40 40 Q100 30 150 52" stroke="#D9431F" stroke-width="3" fill="none" opacity=".6"/><text x="56" y="70" font-family="Big Shoulders Display, sans-serif" font-weight="900" font-size="30" fill="#F4F5EF">GO GOLF</text></g>`;
+  s+=item(4,fl,780,560);
+
+  // 2 · foam balls: standard white and firmer outer layer (green)
+  let bl='';const ball=(x,y,firm)=>{let b=`<g filter="url(#kShS)"><circle cx="${x}" cy="${y}" r="24" fill="url(#${firm?'kBallG':'kBallW'})"/>`;
+    for(let i=0;i<22;i++){const a=i*2.4,rr=4+((i*7)%17);const dx=Math.cos(a)*rr,dy=Math.sin(a)*rr;if(dx*dx+dy*dy<400)b+=`<circle cx="${(x+dx).toFixed(1)}" cy="${(y+dy).toFixed(1)}" r="1.8" fill="${firm?'#5E9D6E':'#B9C2BD'}" opacity=".7"/>`}
+    if(firm)b+=`<circle cx="${x}" cy="${y}" r="22" fill="none" stroke="#3E7C4F" stroke-width="2.5" opacity=".7"/><path d="M${x-22} ${y} Q${x} ${y-10} ${x+22} ${y}" stroke="#3E7C4F" stroke-width="1.5" fill="none" opacity=".6"/>`;
+    return b+`<ellipse cx="${x-8}" cy="${y-9}" rx="7" ry="4" fill="#FFFFFF" opacity=".65"/></g>`};
+  [[1018,586,0],[1072,572,0],[1044,634,0],[1118,628,1],[1162,586,1],[1140,664,1]].forEach(([x,y,f])=>bl+=ball(x,y,f));
+  s+=item(2,bl,1080,590);
+
+  // numbered pins
+  const pins=[[1,610,40],[2,1180,540],[3,1150,226],[4,560,488],[5,836,232],[6,462,430]];
+  s+=pins.map(([n,x,y])=>`<g class="kit-pin" data-k="${n}"><circle cx="${x}" cy="${y}" r="17" fill="#F2552C" stroke="#FFFFFF" stroke-width="3"/><text x="${x}" y="${y+6}" text-anchor="middle" font-family="Barlow, sans-serif" font-weight="700" font-size="17" fill="#FFFFFF">${n}</text></g>`).join('');
+  svg.innerHTML=s;
+
+  // hover links between cards and drawing
+  const cards=[...document.querySelectorAll('.bag-card')];
+  const hi=k=>{cards.forEach(c=>c.classList.toggle('hot',c.dataset.k===k));svg.querySelectorAll('.kit-pin').forEach(p=>p.setAttribute('transform',p.dataset.k===k?`translate(0 -5)`:''))};
+  cards.forEach(c=>{c.addEventListener('mouseenter',()=>hi(c.dataset.k));c.addEventListener('mouseleave',()=>hi(null))});
+
+  // pack it up: every piece slides into the bag
+  const BAGC=[260,520];let packed=false,raf;
+  const groups=[...svg.querySelectorAll('.kit-item')];const pinsEls=[...svg.querySelectorAll('.kit-pin')];const zip=svg.querySelector('#zipPull');
+  function setP(p){
+    groups.forEach((g,i)=>{const cx=+g.dataset.cx,cy=+g.dataset.cy;const d=clamp(p*1.6-i*.12,0,1);const e=ease(d);
+      const sc=1-e*.88;const tx=(BAGC[0]-cx)*e,ty=(BAGC[1]-cy)*e;
+      g.setAttribute('transform',`translate(${(cx+tx).toFixed(1)} ${(cy+ty).toFixed(1)}) scale(${sc.toFixed(3)}) translate(${-cx} ${-cy})`);g.setAttribute('opacity',(1-seg(d,.8,1)).toFixed(2))});
+    pinsEls.forEach(p_=>p_.setAttribute('opacity',(1-Math.min(1,p*3)).toFixed(2)));
+    zip.setAttribute('transform',`translate(${(150+200*seg(p,.75,1)).toFixed(1)} 556)`);
+  }
+  $('packBtn').onclick=()=>{
+    packed=!packed;const from=packed?0:1,to=packed?1:0;$('packBtn').textContent=packed?'Unpack the bag':'Pack it up';
+    $('packNote').textContent=packed?'Everything fits in one bag. Grab it and go.':'';
+    if(reduce){setP(to);return}
+    cancelAnimationFrame(raf);const t0=performance.now();const D=1500;
+    (function loop(now){const u=seg(now-t0,0,D);setP(from+(to-from)*u);if(u<1)raf=requestAnimationFrame(loop)})(t0);
+  };
+})();
+
+/* ---------- Two-piece club: screws together like the logo ---------- */
+(function(){
+  const svg=$('jointSvg');if(!svg)return;ensureSteel(svg);
+  svg.insertAdjacentHTML('beforeend',`<defs><linearGradient id="jSteel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#A3AEA9"/><stop offset=".35" stop-color="#F4F6F5"/><stop offset=".7" stop-color="#C7CFCB"/><stop offset="1" stop-color="#8A9590"/></linearGradient><linearGradient id="jGrip" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3A4741"/><stop offset=".45" stop-color="#1E2923"/><stop offset="1" stop-color="#0C120F"/></linearGradient></defs>
+  <g id="jUp"><path d="M70 110 Q62 110 62 120 Q62 130 70 130 L300 127 L300 113 Z" fill="url(#jGrip)"/>${Array.from({length:28},(_,i)=>`<path d="M${76+i*8} 111 l6 18" stroke="#45544C" stroke-width="1.2"/>`).join('')}<path d="M300 114 L310 115 L310 125 L300 126 Z" fill="#0E1611"/><rect x="310" y="116" width="290" height="8" fill="url(#jSteel)"/><rect x="598" y="117.5" width="40" height="5" fill="#9AA6A0"/><g id="jThr">${Array.from({length:13},(_,i)=>`<path d="M${599+i*3} 117.5 l1.5 5" stroke="#5E6B65" stroke-width=".9"/>`).join('')}</g></g>
+  <g id="jLow"><rect x="610" y="111" width="28" height="18" rx="3" fill="url(#jSteel)" stroke="#6F7C76"/>${Array.from({length:7},(_,i)=>`<line x1="${614+i*3.4}" y1="111" x2="${614+i*3.4}" y2="129" stroke="#7E8B85" stroke-width="1"/>`).join('')}<rect x="636" y="111" width="4" height="18" fill="#F2552C"/><rect x="640" y="116" width="360" height="8" fill="url(#jSteel)"/><g id="jHead"><path d="M992 113 L1018 112 Q1026 112 1028 120 L1042 196 Q1044 208 1032 208 L1004 208 Q993 208 992 197 Z" fill="url(#jSteel)" stroke="#5E6B65"/>${Array.from({length:8},(_,i)=>`<line x1="998" y1="${136+i*8}" x2="${1030+i*.6}" y2="${136+i*8}" stroke="#7E8B85" stroke-width="1.6"/>`).join('')}</g></g>
+  <g font-family="Big Shoulders Display, sans-serif" font-weight="700" font-size="17" letter-spacing="1.5" fill="#F4F5EF" id="jLabels" opacity="0">
+    <line x1="180" y1="136" x2="180" y2="186" stroke="#7DB58C" stroke-width="1.4"/><text x="180" y="206" text-anchor="middle">GRIP SECTION</text>
+    <line x1="622" y1="136" x2="622" y2="186" stroke="#F2552C" stroke-width="1.4"/><text x="622" y="206" text-anchor="middle" fill="#F2552C">SCREWS TOGETHER</text><text x="622" y="226" text-anchor="middle" font-family="Barlow, sans-serif" font-weight="500" font-size="14" letter-spacing="0" fill="#B4C9BC">Unscrews to pack in the bag</text>
+    <line x1="1016" y1="214" x2="1016" y2="236" stroke="#7DB58C" stroke-width="1.4"/><text x="1016" y="254" text-anchor="middle">ADJUSTABLE FACE</text>
+  </g>`);
+  const up=$('jUp'),low=$('jLow'),head=$('jHead'),thr=$('jThr'),lab=$('jLabels');
+  function render(t){
+    let ux,lx,spin;
+    if(t<1100){const u=ease(t/1100);ux=-700*(1-u)-46*u;lx=640*(1-u);spin=0}
+    else if(t<2700){const u=ease((t-1100)/1600);ux=-46*(1-u);lx=0;spin=u*3*2*Math.PI}
+    else{ux=0;lx=0;spin=6*Math.PI}
+    up.setAttribute('transform',`translate(${ux.toFixed(1)} 0)`);low.setAttribute('transform',`translate(${lx.toFixed(1)} 0)`);
+    let c=Math.cos(spin);if(Math.abs(c)<.06)c=c<0?-.06:.06;head.setAttribute('transform',`translate(0 120) scale(1 ${c.toFixed(3)}) translate(0 -120)`);
+    lab.setAttribute('opacity',seg(t,2700,3100).toFixed(2));
+  }
+  function play(){if(reduce){render(99999);return}const t0=performance.now();(function loop(now){const t=now-t0;render(t);if(t<3200)requestAnimationFrame(loop)})(t0)}
+  render(0);
+  $('jointReplay').onclick=play;
+  const io=new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)){play();io.disconnect()}},{threshold:.5});io.observe(svg);
+})();
+
+/* ---------- Mini game ---------- */
+(function(){
+  const svg=$('game');
+  const HOLES=[
+    {name:'The beach',sky:['#7FCBEA','#F2E7C9'],ground:'#EBD39C',par:3,cup:548,obs:{x:290,w:46,h:58,draw:'boards'},msg:'Hole 1: chip it over the surfboards.'},
+    {name:'The park',sky:['#9ED3EA','#E4F2EC'],ground:'#69B565',par:3,cup:520,obs:{x:300,w:70,h:92,draw:'tree'},msg:'Hole 2: get it over the oak tree.'},
+    {name:'The backyard',sky:['#F7C98B','#FBE9C6'],ground:'#5DAE5E',par:2,cup:470,obs:{x:250,w:110,h:14,draw:'pool'},msg:'Hole 3: stay out of the kiddie pool.'}
+  ];
+  const G=250,START=70,g=900,VMAX=760;
+  let hi=0,loft=1,strokes=0,bx=START,state='ready',power=0,holdT=0,raf;
+  const loftWrap=$('gLoft');
+  LOFTS.forEach((l,i)=>{const b=document.createElement('button');b.type='button';b.textContent=l.name;b.onclick=()=>{loft=i;mark()};loftWrap.appendChild(b)});
+  function mark(){[...loftWrap.children].forEach((b,i)=>b.setAttribute('aria-pressed',i===loft))}
+  let ballEl,shEl,clubG,trail,hole;
+  function draw(){
+    hole=HOLES[hi];svg.innerHTML='';
+    const d=el('defs',{},svg);ensureSteel(svg);const gr=el('linearGradient',{id:'gSky',x1:0,y1:0,x2:0,y2:1},d);el('stop',{offset:0,'stop-color':hole.sky[0]},gr);el('stop',{offset:1,'stop-color':hole.sky[1]},gr);
+    el('rect',{width:640,height:300,fill:'url(#gSky)'},svg);
+    if(hi===0){el('rect',{y:196,width:640,height:40,fill:'#2B97C0'},svg);el('path',{d:'M0 232 Q160 222 320 232 T640 230 L640 240 L0 240Z',fill:'#fff',opacity:.8},svg);el('circle',{cx:560,cy:70,r:28,fill:'#F6C445'},svg)}
+    if(hi===1){el('path',{d:'M0 214 Q160 190 320 208 T640 200 L640 240 L0 240Z',fill:'#4C9A5C'},svg);el('circle',{cx:90,cy:60,r:24,fill:'#F6C445'},svg)}
+    if(hi===2){for(let x=0;x<640;x+=22)el('path',{d:`M${x+1} 244 V186 l10 -8 l10 8 V244Z`,fill:(x/22)%2?'#C99363':'#D1A06F'},svg);el('circle',{cx:320,cy:120,r:40,fill:'#F6C445',opacity:.85})}
+    el('rect',{y:G-6,width:640,height:62,fill:hole.ground},svg);
+    const o=hole.obs;
+    if(o.draw==='boards'){[['#F2552C',-8],['#F6C445',4],['#FFFFFF',-3]].forEach(([c,a],i)=>{const x=o.x+8+i*15;el('ellipse',{cx:x,cy:G-o.h/2,rx:8,ry:o.h/2+4,fill:c,stroke:'#B8A27A','stroke-width':1.2,transform:`rotate(${a} ${x} ${G})`},svg)})}
+    if(o.draw==='tree'){const cx=o.x+o.w/2;el('rect',{x:cx-5,y:G-48,width:10,height:48,fill:'#6C4424'},svg);el('circle',{cx,cy:G-66,r:28,fill:'#2F7D44'},svg);el('circle',{cx:cx-22,cy:G-54,r:18,fill:'#3C8A4E'},svg);el('circle',{cx:cx+22,cy:G-54,r:19,fill:'#3C8A4E'},svg)}
+    if(o.draw==='pool'){el('ellipse',{cx:o.x+o.w/2,cy:G+2,rx:o.w/2+6,ry:12,fill:'#F2552C'},svg);el('ellipse',{cx:o.x+o.w/2,cy:G,rx:o.w/2,ry:8,fill:'#5CC3E6'},svg)}
+    el('ellipse',{cx:hole.cup,cy:G,rx:26,ry:6,fill:'#F4F5EF',stroke:'#10241A','stroke-width':1.5},svg);el('ellipse',{cx:hole.cup,cy:G,rx:19,ry:4,fill:'#1C2A22'},svg);
+    el('line',{x1:hole.cup+3,y1:G,x2:hole.cup+3,y2:G-70,stroke:'#F4F5EF','stroke-width':3},svg);el('path',{d:`M${hole.cup+5} ${G-69} q15 -4 28 6 q-13 4 -28 11Z`,fill:'#F2552C'},svg);
+    el('path',{d:`M${START-22} ${G+4} L${START-6} ${G-6} L${START+40} ${G-6} L${START+24} ${G+4}Z`,fill:'#2E7D4A'},svg);
+    trail=el('path',{fill:'none',stroke:'#fff','stroke-width':2.2,'stroke-dasharray':'1.5 7','stroke-linecap':'round'},svg);
+    clubG=el('g',{},svg);
+    shEl=el('ellipse',{rx:5,ry:2,fill:'rgba(0,0,0,.25)'},svg);
+    ballEl=el('circle',{r:5.5,fill:'#fff',stroke:'#B9C2BD'},svg);
+    placeBall(bx,G-5.5);drawClub(0);
+    $('gHole').textContent=(hi+1)+' · '+hole.name;$('gPar').textContent=hole.par;$('gStrokes').textContent=strokes;
+  }
+  function placeBall(x,y){ballEl.setAttribute('cx',x);ballEl.setAttribute('cy',y);shEl.setAttribute('cx',x);shEl.setAttribute('cy',G+1)}
+  function drawClub(a){const dir=hole.cup>=bx?1:-1;clubAt(clubG,bx-8,G-118,100,a,LOFTS[loft].deg,.8);clubG.setAttribute('transform',dir<0?`translate(${2*bx} 0) scale(-1 1)`:'')}
+  function setMsg(t){$('gMsg').textContent=t}
+  // hold to power
+  const btn=$('gSwing');
+  function start(e){if(e)e.preventDefault();if(state!=='ready')return;state='charging';holdT=performance.now();
+    const loop=now=>{if(state!=='charging')return;const t=(now-holdT)/1000;power=Math.abs(((t*0.9)%2)-1);power=1-power;$('gMeter').style.width=(power*100).toFixed(1)+'%';drawClub(-1.7*power);raf=requestAnimationFrame(loop)};raf=requestAnimationFrame(loop)}
+  function release(e){if(e)e.preventDefault();if(state!=='charging')return;cancelAnimationFrame(raf);state='flying';strokes++;$('gStrokes').textContent=strokes;shoot(Math.max(.08,power))}
+  btn.addEventListener('pointerdown',start);btn.addEventListener('pointerup',release);btn.addEventListener('pointerleave',release);btn.addEventListener('pointercancel',release);
+  btn.addEventListener('keydown',e=>{if((e.key===' '||e.key==='Enter')&&!e.repeat)start(e)});btn.addEventListener('keyup',e=>{if(e.key===' '||e.key==='Enter')release(e)});
+  function shoot(p){
+    const L=LOFTS[loft];const th=L.launch*Math.PI/180;const dir=hole.cup>=bx?1:-1;
+    let v=p*VMAX,vx=Math.cos(th)*v*dir,vy=-Math.sin(th)*v,x=bx,y=G-5.5;const o=hole.obs;const pts=[[x,y]];
+    let phase='air',t0=performance.now(),last=t0,swingT=0,rollV=0,hitObs=false;
+    const step=now=>{const dt=Math.min(.033,(now-last)/1000);last=now;swingT+=dt;
+      drawClub(Math.min(1.5,-1.7*p+swingT*14));
+      if(phase==='air'){vy+=g*dt;x+=vx*dt;y+=vy*dt;
+        // obstacle collision (not for the pool, which is a hazard on the ground)
+        if(o.draw!=='pool'&&x>o.x-4&&x<o.x+o.w+4&&y>G-o.h&&!hitObs){hitObs=true;x=vx>0?o.x-5:o.x+o.w+5;vx=-vx*.25}
+        if(y>=G-5.5){y=G-5.5;
+          if(o.draw==='pool'&&x>o.x&&x<o.x+o.w){phase='done';finish('splash',x);return}
+          if(Math.abs(x-hole.cup)<14&&Math.abs(vx)<380){phase='done';finish('in',x);return}
+          rollV=vx*L.roll*(hitObs?.2:1);phase='roll'}
+        pts.push([x,y])}
+      else if(phase==='roll'){x+=rollV*dt;rollV*=Math.pow(.18,dt);if(o.draw!=='pool'&&x>o.x-5&&x<o.x+o.w+5){x=rollV>0?o.x-5:o.x+o.w+5;rollV=0}
+        if(o.draw==='pool'&&x>o.x&&x<o.x+o.w){phase='done';finish('splash',x);return}
+        if(Math.abs(x-hole.cup)<10&&Math.abs(rollV)<260){phase='done';finish('in',x);return}
+        if(Math.abs(rollV)<6){phase='done';finish('stop',x);return}}
+      x=clamp(x,8,632);
+      placeBall(x,y);trail.setAttribute('d','M'+pts.map(q=>q[0].toFixed(1)+' '+q[1].toFixed(1)).join(' L'));
+      raf=requestAnimationFrame(step)};
+    raf=requestAnimationFrame(step);
+  }
+  const PAR={'-2':'Eagle!','-1':'Birdie!','0':'Par.','1':'Bogey.','2':'Double bogey.'};
+  function finish(how,x){
+    if(how==='in'){placeBall(hole.cup,G-2);ballEl.setAttribute('r',0);shEl.setAttribute('rx',0);state='holed';
+      const diff=strokes-hole.par;const name=strokes===1?'Hole in one!':(PAR[diff]||(diff>0?'+'+diff+'.':'Nice.'));
+      setMsg(`${name} In the cup in ${strokes}. ${hi<HOLES.length-1?'Winner sets the next hole.':'That\'s the round. Now picture it with your friends.'}`);
+      $('gAfter').hidden=false;$('gNext').textContent=hi<HOLES.length-1?'Next hole':'Play again';return}
+    if(how==='splash'){strokes++;$('gStrokes').textContent=strokes;setMsg('Splash. That\'s a penalty stroke. Drop it back on the mat.');bx=START;setTimeout(()=>{state='ready';draw()},700);return}
+    const ob=hole.obs;if(ob.draw!=='pool'&&x>ob.x-6&&x<ob.x+ob.w+6){x=(bx<ob.x)?ob.x-10:ob.x+ob.w+10}
+    bx=x;placeBall(x,G-5.5);state='ready';const dist=Math.abs(hole.cup-x);
+    setMsg(dist<60?'So close. Tap it in. Try a low loft.':x<hole.obs.x?'Short. Get it over the obstacle.':'Not quite. Hit again from where it stopped.');
+    $('gMeter').style.width='0%';drawClub(0);
+  }
+  $('gNext').onclick=()=>{hi=(hi+1)%HOLES.length;strokes=0;bx=START;state='ready';$('gAfter').hidden=true;$('gMeter').style.width='0%';setMsg(HOLES[hi].msg);draw()};
+  mark();draw();
+})();
+
+/* ---------- QR ---------- */
+try{const q=qrcode(0,'M');q.addData(SITE_URL+'#shot');q.make();$('qr').innerHTML=q.createSvgTag({cellSize:6,margin:0,scalable:true})}
+catch(e){$('qr').textContent='Open '+SITE_URL+' on your phone.'}
+
+/* ---------- Dare builder ---------- */
+const v=i=>$(i).value.trim();
+['hSpot','hTee','hPin','hObs','hShot','hPar','hFrom','hTo','hTalk'].forEach(i=>{$(i).addEventListener('input',renderCard);$(i).addEventListener('change',renderCard)});
+$('holeForm').addEventListener('submit',e=>e.preventDefault());
+function renderCard(){
+  $('cSpot').textContent=v('hSpot')||'Anywhere';$('cPar').textContent=v('hPar');$('cTee').textContent=v('hTee')||'Your call';$('cPin').textContent=v('hPin')||'Your call';
+  $('cObs').textContent=v('hObs')||'Nothing. Too easy?';$('cShot').textContent=v('hShot')||'Anything goes';$('cTalk').textContent=v('hTalk')||'Run it back.';
+  $('cFrom').textContent='From '+(v('hFrom')||'someone')+(v('hTo')?' to '+v('hTo'):'')+'. Winner sets the next hole.';
+}
+renderCard();
+$('copyDare').onclick=async()=>{const t=`GO GOLF DARE${v('hTo')?' for '+v('hTo'):''}\nWhere: ${v('hSpot')}\nTee: ${v('hTee')}\nTarget: ${v('hPin')}\nIn the way: ${v('hObs')||'nothing'}\nShot: ${v('hShot')}\nBeat ${v('hPar')} stroke${v('hPar')==='1'?'':'s'}.\n"${v('hTalk')}" - ${v('hFrom')}`;
+  try{await navigator.clipboard.writeText(t);$('dareStatus').textContent='Dare copied. Paste it in your group chat.'}catch(e){$('dareStatus').textContent="Couldn't copy here. Screenshot the card instead."}};
+
+/* ---------- Data layer (claude.ai storage now; swap for Supabase/Firebase on GitHub) ---------- */
+const Store={db:null,assets:null,uid:null,ready:null};
+Store.ready=(async()=>{try{if(!window.claude||!window.claude.use)return;
+  const [db,assets,user]=await Promise.all([window.claude.use('db'),window.claude.use('assets'),window.claude.use('user')]);
+  Store.db=db;Store.assets=assets;if(user&&user.id)Store.uid=await user.id()}catch(e){}})();
+const docs=snap=>(snap&&snap.docs||[]).map(d=>Object.assign({id:d.id},typeof d.data==='function'?d.data():d));
+async function getDoc(col,id){try{const s=await Store.db.collection(col).doc(id).get();if(!s)return null;if(s.exists===false)return null;const d=typeof s.data==='function'?s.data():s;return d&&Object.keys(d).length?d:null}catch(e){return null}}
+const NOT_OPEN="Founding member spots open very soon. Check back in a few days!";
+function weekKey(d){d=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));const day=d.getUTCDay()||7;d.setUTCDate(d.getUTCDate()+4-day);const y=new Date(Date.UTC(d.getUTCFullYear(),0,1));return d.getUTCFullYear()+'-W'+String(Math.ceil(((d-y)/864e5+1)/7)).padStart(2,'0')}
+const THIS_WEEK=weekKey(new Date()), LAST_WEEK=weekKey(new Date(Date.now()-7*864e5));
+
+/* ---------- Founding members ---------- */
+let members=[],me=null;
+function code(){const c='abcdefghjkmnpqrstuvwxyz23456789';let s='';for(let i=0;i<6;i++)s+=c[Math.floor(Math.random()*c.length)];return s}
+function computeMembers(){
+  const byAt=members.slice().sort((a,b)=>(a.at||0)-(b.at||0));
+  const refs={};members.forEach(m=>{if(m.refBy)refs[m.refBy]=(refs[m.refBy]||0)+1});
+  byAt.forEach((m,i)=>{m.n=i+1;m.refs=refs[m.code]||0});
+  const line=byAt.slice().sort((a,b)=>b.refs-a.refs||(a.at-b.at));line.forEach((m,i)=>m.line=i+1);
+  return{byAt,line};
+}
+function renderMembers(){
+  const {line}=computeMembers();const total=members.length;
+  $('heroCount').innerHTML=total?`<b>${total}</b> founding member${total===1?'':'s'} so far`:'';
+  const top=line.filter(m=>m.refs>0).slice(0,5);const b=$('board');b.innerHTML='';
+  if(!top.length){const li=document.createElement('li');li.className='empty';li.textContent='No invites yet. The first person to bring a friend takes the top spot.';b.appendChild(li)}
+  top.forEach((m,i)=>{const li=document.createElement('li');const r=document.createElement('span');r.className='r';r.textContent=i+1;const n=document.createElement('span');n.textContent=m.name||'Member';const c=document.createElement('span');c.className='c';c.textContent=m.refs;li.append(r,n,c);b.appendChild(li)});
+  const mine=Store.uid&&members.find(m=>m.id===Store.uid);
+  if(mine){me=mine;showMe()}
+}
+function showMe(){
+  $('mcard').classList.remove('preview');
+  $('mNum').innerHTML='<span>#</span>'+String(me.n||'').padStart(4,'0');$('mName').textContent=me.name||'';
+  $('mePanel').hidden=false;$('sLine').textContent='#'+me.line;$('sRefs').textContent=me.refs;$('sTotal').textContent=members.length;
+  $('inviteLink').value=SITE_URL+'#ref-'+me.code;
+  $('joinBtn').textContent='Update my info';
+  $('joinStatus').textContent=`You're founding member #${String(me.n).padStart(4,'0')}. Share your link to move up.`;
+}
+$('mName').textContent=$('jName').value||'Your name here';
+$('jName').addEventListener('input',()=>{if(!me)$('mName').textContent=$('jName').value||'Your name here'});
+$('copyInvite').onclick=async()=>{try{await navigator.clipboard.writeText($('inviteLink').value);$('inviteStatus').textContent='Link copied. Send it to your group chat.'}catch(e){$('inviteStatus').textContent='Copy the link above and send it to your friends.'}};
+$('joinForm').addEventListener('submit',async e=>{
+  e.preventDefault();const st=$('joinStatus');const name=v('jName'),email=v('jEmail');
+  if(!name){st.textContent='Add your first name.';$('jName').focus();return}
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){st.textContent='Enter a valid email so we can reach you.';$('jEmail').focus();return}
+  await Store.ready;if(!Store.db||!Store.uid){st.textContent=NOT_OPEN;return}
+  $('joinBtn').disabled=true;st.textContent='Saving your spot…';
+  try{
+    const existing=await getDoc('members',Store.uid);
+    const m=existing||{code:code(),at:Date.now(),refBy:pendingRef||''};
+    if(m.refBy&&members.some(x=>x.code===m.refBy&&x.id===Store.uid))m.refBy='';
+    m.name=name.slice(0,24);
+    await Store.db.collection('members').doc(Store.uid).set(m);
+    await Store.db.collection('signups').doc(Store.uid).set({name,email,where:v('jWhere'),blocker:v('jBlock'),plays:v('jPlay'),refBy:m.refBy||'',at:m.at});
+    st.textContent="You're in.";
+  }catch(err){st.textContent="Couldn't save your spot. Try again in a minute."}
+  $('joinBtn').disabled=false;
+});
+
+/* ---------- Trick shots ---------- */
+let shots=[],votes=[];
+function tally(week){const t={};votes.forEach(vt=>{const f=vt.byWeek&&vt.byWeek[week];if(f)t[f]=(t[f]||0)+1});return t}
+function renderShots(){
+  const t=tally(THIS_WEEK);const mineVote=(votes.find(x=>x.id===Store.uid)||{}).byWeek;const myPick=mineVote&&mineVote[THIS_WEEK];
+  const list=shots.filter(s=>s.week===THIS_WEEK).sort((a,b)=>(t[b.id]||0)-(t[a.id]||0)||b.at-a.at);
+  const w=$('shotWall');w.innerHTML='';
+  $('wallNote').textContent=list.length?`This week's shots · ${list.length} posted · one vote per person`:'No shots yet this week. Be the first one on the board.';
+  list.forEach(s=>{const c=document.createElement('div');c.className='shot';const vd=document.createElement('video');vd.src=s.url||('/_blob/'+s.videoId);vd.controls=true;vd.playsInline=true;vd.preload='metadata';
+    const m=document.createElement('div');m.className='meta';const b=document.createElement('b');b.textContent=s.name;const p=document.createElement('p');p.textContent=s.desc||'';
+    const btn=document.createElement('button');btn.className='vote';btn.type='button';const n=t[s.id]||0;btn.textContent=(myPick===s.id?'Voted':'Vote')+' · '+n;btn.setAttribute('aria-pressed',myPick===s.id);btn.onclick=()=>vote(s.id);
+    m.append(b,p,btn);c.append(vd,m);w.appendChild(c)});
+  // last week's winner
+  const lt=tally(LAST_WEEK);const prev=shots.filter(s=>s.week===LAST_WEEK).sort((a,b)=>(lt[b.id]||0)-(lt[a.id]||0));const f=$('featured');
+  if(prev.length&&(lt[prev[0].id]||0)>0){const s=prev[0];f.innerHTML='';const vd=document.createElement('video');vd.src=s.url||('/_blob/'+s.videoId);vd.controls=true;vd.playsInline=true;const b=document.createElement('b');b.style.cssText='font-family:var(--display);font-size:26px;text-transform:uppercase';b.textContent=s.name+' · '+lt[s.id]+' votes';f.append(vd,b)}
+}
+async function vote(id){
+  await Store.ready;if(!Store.db||!Store.uid){$('wallNote').textContent=NOT_OPEN;return}
+  try{const cur=(await getDoc('votes',Store.uid))||{byWeek:{}};cur.byWeek=cur.byWeek||{};cur.byWeek[THIS_WEEK]=id;await Store.db.collection('votes').doc(Store.uid).set(cur)}
+  catch(e){$('wallNote').textContent="Couldn't save your vote. Try again in a minute."}
+}
+$('shotForm').addEventListener('submit',async e=>{
+  e.preventDefault();const st=$('shotStatus');const f=$('sVideo').files[0];
+  if(!v('sName')){st.textContent='Add your name or handle.';$('sName').focus();return}
+  if(!f){st.textContent='Choose a video of your shot.';return}
+  if(f.size>20*1024*1024){st.textContent='That video is over 20 MB. Trim it and try again.';return}
+  await Store.ready;if(!Store.db||!Store.assets||!Store.uid){st.textContent=NOT_OPEN;return}
+  $('shotBtn').disabled=true;st.textContent='Uploading your shot…';
+  try{const up=await Store.assets.upload(f);await Store.db.collection('shots').doc(Store.uid).set({name:v('sName'),desc:v('sDesc'),videoId:up.id,url:up.url,week:THIS_WEEK,at:Date.now()});st.textContent="You're on the board. Go get votes.";e.target.reset()}
+  catch(err){st.textContent="Couldn't upload your shot. Check your connection and try again."}
+  $('shotBtn').disabled=false;
+});
+
+/* ---------- Live subscriptions ---------- */
+Store.ready.then(()=>{
+  if(!Store.db)return;
+  const sub=(col,cb)=>{try{Store.db.collection(col).onSnapshot(s=>cb(docs(s)),()=>{})}catch(e){}};
+  sub('members',d=>{members=d;renderMembers()});
+  sub('shots',d=>{shots=d;renderShots()});
+  sub('votes',d=>{votes=d;renderShots()});
+});
+
+/* ---------- Scorecard ---------- */
+const KEY='gogolf-scorecard-v1';
+let sc;
+function fresh(){return{holes:9,players:['Player 1','Player 2'],desc:Array(18).fill(''),strokes:{}}}
+try{sc=JSON.parse(localStorage.getItem(KEY))||fresh()}catch(e){sc=fresh()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(sc))}catch(e){}}
+function s(p,h){return (sc.strokes[p]||{})[h]}
+function setS(p,h,val){sc.strokes[p]=sc.strokes[p]||{};if(val===''||val==null||isNaN(val))delete sc.strokes[p][h];else sc.strokes[p][h]=Math.max(0,Math.min(20,+val));save();}
+function holeWinner(h){const vals=sc.players.map((_,p)=>s(p,h));if(vals.some(x=>x==null))return null;const m=Math.min(...vals);const w=vals.map((x,i)=>x===m?i:-1).filter(i=>i>=0);return w.length===1?w[0]:-1}
+function totals(){return sc.players.map((_,p)=>{let t=0,n=0;for(let h=0;h<sc.holes;h++){const x=s(p,h);if(x!=null){t+=x;n++}}return{t,n}})}
+function renderPlayers(){
+  const w=$('players');w.innerHTML='';
+  sc.players.forEach((name,i)=>{const c=document.createElement('div');c.className='player-chip';const inp=document.createElement('input');inp.type='text';inp.id='pl'+i;inp.value=name;inp.maxLength=16;inp.setAttribute('aria-label','Player '+(i+1)+' name');
+    inp.oninput=()=>{sc.players[i]=inp.value||('Player '+(i+1));save();renderTable(false)};
+    const x=document.createElement('button');x.type='button';x.textContent='×';x.setAttribute('aria-label','Remove '+name);x.disabled=sc.players.length<=1;
+    x.onclick=()=>{sc.players.splice(i,1);const ns={};Object.keys(sc.strokes).forEach(k=>{const n=+k;if(n<i)ns[n]=sc.strokes[k];else if(n>i)ns[n-1]=sc.strokes[k]});sc.strokes=ns;save();renderScore()};
+    c.append(inp,x);w.appendChild(c)});
+  if(sc.players.length<6){const add=document.createElement('button');add.type='button';add.className='btn sm';add.textContent='+ Add player';add.onclick=()=>{sc.players.push('Player '+(sc.players.length+1));save();renderScore();const last=$('pl'+(sc.players.length-1));last&&last.select()};w.appendChild(add)}
+}
+function renderTable(){
+  const tb=$('scTable');const P=sc.players;
+  let h='<thead><tr><th>Hole</th><th style="text-align:left">The hole (where, target, what\'s in the way)</th>'+P.map(n=>`<th>${esc(n)}</th>`).join('')+'</tr></thead><tbody>';
+  for(let i=0;i<sc.holes;i++){
+    const prev=i>0?holeWinner(i-1):null;
+    const setter=prev!=null&&prev>=0?esc(P[prev])+' sets this hole':(prev===-1?'Tie. Loser picks? Your call.':'');
+    const win=holeWinner(i);
+    h+=`<tr><td class="hn"><span>${i+1}</span></td><td class="desc"><input type="text" id="d${i}" maxlength="80" value="${esc(sc.desc[i]||'')}" placeholder="e.g. Bench to the tree stump" aria-label="Describe hole ${i+1}"><small>${setter}</small></td>`;
+    P.forEach((_,p)=>{const val=s(p,i);h+=`<td class="${win===p?'win':''}"><div class="stroke"><button type="button" data-p="${p}" data-h="${i}" data-d="-1" aria-label="One less stroke">−</button><input type="text" inputmode="numeric" id="s${p}_${i}" data-p="${p}" data-h="${i}" value="${val==null?'':val}" aria-label="${esc(P[p])} strokes on hole ${i+1}"><button type="button" data-p="${p}" data-h="${i}" data-d="1" aria-label="One more stroke">+</button></div></td>`});
+    h+='</tr>';
+  }
+  const T=totals();const done=T.filter(x=>x.n>0);const best=done.length?Math.min(...done.map(x=>x.t)):null;
+  h+='</tbody><tfoot><tr><td></td><td style="text-align:left;font-family:var(--label);font-size:15px;letter-spacing:.1em;text-transform:uppercase">Total</td>'+T.map(x=>`<td class="${x.n&&x.t===best?'leader':''}">${x.n?x.t:'–'}</td>`).join('')+'</tr></tfoot>';
+  tb.innerHTML=h;
+  const holesWon=P.map((_,p)=>{let w=0;for(let i=0;i<sc.holes;i++)if(holeWinner(i)===p)w++;return w});
+  $('leader').textContent=best==null?'Tap + to add strokes.':'Leading on strokes: '+P.filter((_,p)=>T[p].n&&T[p].t===best).join(' & ')+' · Holes won: '+P.map((n,p)=>n+' '+holesWon[p]).join(', ');
+}
+function esc(t){return String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+$('scTable').addEventListener('click',e=>{const b=e.target.closest('button[data-d]');if(!b)return;const p=+b.dataset.p,h=+b.dataset.h;const d=+b.dataset.d;const cur=s(p,h);if(cur==null){if(d>0)setS(p,h,1)}else{const nv=cur+d;setS(p,h,nv<=0?'':nv)}renderTable();});
+$('scTable').addEventListener('change',e=>{const t=e.target;if(t.id&&t.id[0]==='d'){sc.desc[+t.id.slice(1)]=t.value;save()}else if(t.dataset.p!=null){setS(+t.dataset.p,+t.dataset.h,t.value.trim()===''?'':parseInt(t.value,10));renderTable()}});
+$('holeCount').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;sc.holes=+b.dataset.n;save();renderScore()});
+function renderScore(){[...$('holeCount').children].forEach(b=>b.setAttribute('aria-pressed',+b.dataset.n===sc.holes));renderPlayers();renderTable()}
+$('newRound').onclick=()=>{const keep=sc.players.slice();sc=fresh();sc.players=keep;save();renderScore();$('scStatus').textContent='New round started.'};
+$('copyScore').onclick=async()=>{const T=totals();let t='GO GOLF SCORECARD\n';for(let i=0;i<sc.holes;i++){if(sc.players.every((_,p)=>s(p,i)==null))continue;t+=`Hole ${i+1}${sc.desc[i]?' ('+sc.desc[i]+')':''}: `+sc.players.map((n,p)=>n+' '+(s(p,i)??'-')).join(', ')+'\n'}t+='TOTAL: '+sc.players.map((n,p)=>n+' '+T[p].t).join(', ');
+  try{await navigator.clipboard.writeText(t);$('scStatus').textContent='Results copied.'}catch(e){$('scStatus').textContent="Couldn't copy here. Screenshot it instead."}};
+
+
+route();
+})();
+</script>
+</body>
+</html>
